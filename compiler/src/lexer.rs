@@ -203,7 +203,7 @@ impl<'a> Lexer<'a> {
                 Some('r') => '\r',
                 Some('t') => '\t',
                 Some('\\') => '\\',
-                Some('\\'') => '\\'',
+                Some('\'') => '\'',
                 Some(other) => {
                     self.diagnostics.push(Diagnostic::error(
                         "T0006",
@@ -218,7 +218,7 @@ impl<'a> Lexer<'a> {
             None => '\0',
         };
 
-        if self.peek() == Some(''') {
+        if self.peek() == Some('\'') {
             self.advance();
         } else {
             self.diagnostics.push(Diagnostic::error(
