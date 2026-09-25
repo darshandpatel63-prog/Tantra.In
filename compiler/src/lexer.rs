@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use unicode_ident::{is_xid_continue, is_xid_start};
 use unicode_normalization::UnicodeNormalization;
-use unicode_security::confusable_detection::char_confusable_prototype;
+use unicode_security::skeleton;
 
 use crate::diagnostic::{Diagnostic, Span};
 use crate::token::{Token, TokenKind};
@@ -465,15 +465,15 @@ fn confusable_ascii_prototype(character: char) -> Option<char> {
         return None;
     }
 
-    let prototype = char_confusable_prototype(character)?;
-    if prototype.len() == 1 {
-        let candidate = prototype[0];
-        if candidate.is_ascii_alphanumeric() {
-            return Some(candidate);
-        }
-    }
+    let skeleton = skeleton(&character.to_string());
+    let mut chars = skeleton.chars();
+    let candidate = chars.next()?;
 
-    None
+    if chars.next().is_none() && candidate.is_ascii_alphanumeric() {
+        Some(candidate)
+    } else {
+        None
+    }
 }
 
 fn keyword(text: &str) -> Option<TokenKind> {
