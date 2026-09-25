@@ -82,6 +82,13 @@ pub enum Stmt {
     },
     Break(Span),
     Continue(Span),
+    Try {
+        body: Block,
+        error_name: String,
+        handler: Block,
+        span: Span,
+    },
+    Throw(Expr, Span),
     Expr(Expr),
     Empty(Span),
 }
@@ -123,6 +130,12 @@ pub enum Expr {
     },
     Grouped(Box<Expr>, Span),
     Array(Vec<Expr>, Span),
+    Conditional {
+        condition: Box<Expr>,
+        then_expr: Box<Expr>,
+        else_expr: Box<Expr>,
+        span: Span,
+    },
 }
 
 pub struct Parser {
@@ -438,6 +451,27 @@ impl Parser {
             });
         }
 
+        if self.match_kind(&TokenKind::Try) {
+            let start = self.previous().span.start;
+            let body = self.block()?;
+            self.consume(&TokenKind::Error, "T1028", "'ભૂલ' expected");
+            let error_name = self.consume_identifier("T1029", "error binding expected")?;
+            let handler = self.block()?;
+            return Some(Stmt::Try {
+                body,
+                error_name: self.identifier_text(&error_name),
+                handler: handler.clone(),
+                span: Span::new(start, handler.span.end),
+            });
+        }
+
+        if self.match_kind(&TokenKind::Throw) {
+            let start = self.previous().span.start;
+            let expr = self.expression()?;
+            let end = self.optional_semicolon_end(value_span(&expr).end);
+            return Some(Stmt::Throw(expr, Span::new(start, end)));
+        }
+
         if self.match_kind(&TokenKind::Break) {
             let span = self.previous().span;
             let end = self.optional_semicolon_end(span.end);
@@ -502,17 +536,48 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Option<Expr> {
-        self.parse_precedence(0)
+        self.assignment()
+    }
+
+    fn assignment(&mut self) -> Option<Expr> {
+        let left = self.conditional()?;
+        if is_assignment_operator(self.peek_kind()) {
+            let op = self.advance().kind.clone();
+            let right = self.assignment()?;
+            let span = Span::new(value_span(&left).start, value_span(&right).end);
+            return Some(Expr::Binary {
+                left: Box::new(left),
+                op,
+                right: Box::new(right),
+                span,
+            });
+        }
+        Some(left)
+    }
+
+    fn conditional(&mut self) -> Option<Expr> {
+        let condition = self.parse_precedence(0)?;
+        if self.match_kind(&TokenKind::Question) {
+            let then_expr = self.assignment()?;
+            self.consume(&TokenKind::Colon, "T1030", "':' expected in conditional expression")?;
+            let else_expr = self.assignment()?;
+            let span = Span::new(value_span(&condition).start, value_span(&else_expr).end);
+            return Some(Expr::Conditional {
+                condition: Box::new(condition),
+                then_expr: Box::new(then_expr),
+                else_expr: Box::new(else_expr),
+                span,
+            });
+        }
+        Some(condition)
     }
 
     fn parse_precedence(&mut self, min_prec: u8) -> Option<Expr> {
         let mut left = self.unary()?;
-
         while let Some((prec, right_assoc)) = binary_precedence(self.peek_kind()) {
             if prec < min_prec {
                 break;
             }
-
             let op = self.advance().kind.clone();
             let next_min = if right_assoc { prec } else { prec + 1 };
             let right = self.parse_precedence(next_min)?;
@@ -524,18 +589,6 @@ impl Parser {
                 span,
             };
         }
-
-        if min_prec == 0 && self.match_kind(&TokenKind::Equal) {
-            let right = self.parse_precedence(0)?;
-            let span = Span::new(value_span(&left).start, value_span(&right).end);
-            left = Expr::Binary {
-                left: Box::new(left),
-                op: TokenKind::Equal,
-                right: Box::new(right),
-                span,
-            };
-        }
-
         Some(left)
     }
 
@@ -544,9 +597,10 @@ impl Parser {
             self.peek_kind(),
             TokenKind::Bang | TokenKind::Plus | TokenKind::Minus
         ) {
-            let op = self.advance().kind.clone();
+            let op_token = self.advance();
+            let op = op_token.kind.clone();
             let expr = self.unary()?;
-            let span = Span::new(self.previous().span.start, value_span(&expr).end);
+            let span = Span::new(op_token.span.start, value_span(&expr).end);
             return Some(Expr::Unary {
                 op,
                 expr: Box::new(expr),
@@ -761,22 +815,34 @@ fn same_variant(a: &TokenKind, b: &TokenKind) -> bool {
     std::mem::discriminant(a) == std::mem::discriminant(b)
 }
 
+fn is_assignment_operator(kind: &TokenKind) -> bool {
+    matches!(
+        kind,
+        TokenKind::Equal
+            | TokenKind::PlusEqual
+            | TokenKind::MinusEqual
+            | TokenKind::StarEqual
+            | TokenKind::SlashEqual
+            | TokenKind::PercentEqual
+    )
+}
+
 fn binary_precedence(kind: &TokenKind) -> Option<(u8, bool)> {
     Some(match kind {
-        TokenKind::OrOr => (1, false),
-        TokenKind::AndAnd => (2, false),
-        TokenKind::Pipe => (3, false),
-        TokenKind::Caret => (4, false),
-        TokenKind::Ampersand => (5, false),
-        TokenKind::EqualEqual | TokenKind::NotEqual => (6, false),
+        TokenKind::OrOr => (2, false),
+        TokenKind::AndAnd => (3, false),
+        TokenKind::Pipe => (4, false),
+        TokenKind::Caret => (5, false),
+        TokenKind::Ampersand => (6, false),
+        TokenKind::EqualEqual | TokenKind::NotEqual => (7, false),
         TokenKind::Less | TokenKind::LessEqual | TokenKind::Greater | TokenKind::GreaterEqual => {
-            (7, false)
+            (8, false)
         }
-        TokenKind::ShiftLeft | TokenKind::ShiftRight => (8, false),
-        TokenKind::Plus | TokenKind::Minus => (9, false),
-        TokenKind::Star | TokenKind::Slash | TokenKind::Percent => (10, false),
-        TokenKind::Power => (11, true),
-        TokenKind::NullCoalesce => (0, false),
+        TokenKind::ShiftLeft | TokenKind::ShiftRight => (9, false),
+        TokenKind::Plus | TokenKind::Minus => (10, false),
+        TokenKind::Star | TokenKind::Slash | TokenKind::Percent => (11, false),
+        TokenKind::Power => (12, true),
+        TokenKind::NullCoalesce => (1, false),
         _ => return None,
     })
 }
@@ -796,7 +862,8 @@ fn value_span(expr: &Expr) -> Span {
         | Expr::Member { span, .. }
         | Expr::Index { span, .. }
         | Expr::Grouped(_, span)
-        | Expr::Array(_, span) => *span,
+        | Expr::Array(_, span)
+        | Expr::Conditional { span, .. } => *span,
     }
 }
 
@@ -812,6 +879,8 @@ fn stmt_span(stmt: &Stmt) -> Span {
         | Stmt::Continue(span)
         | Stmt::Empty(span) => *span,
         Stmt::If { span, .. } | Stmt::While { span, .. } | Stmt::ForEach { span, .. } => *span,
+        Stmt::Try { span, .. } => *span,
+        Stmt::Throw(_, span) => *span,
         Stmt::Expr(expr) => value_span(expr),
     }
 }

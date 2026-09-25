@@ -154,3 +154,55 @@ fn validates_string_and_character_escapes() {
     assert!(nul_diagnostics.is_empty(), "{nul_diagnostics:#?}");
     assert!(matches!(tokens[0].kind, TokenKind::Character('\0')));
 }
+
+
+#[test]
+fn parses_control_flow_and_error_handling_grammar() {
+    let source = r#"
+કાર્ય run(items: Array<પૂર્ણાંક>) {
+    જ્યારે સાચું {
+        જો સાચું {
+            આગળ
+        } નહીં જો ખોટું {
+            તોડો
+        } નહીં {
+            ફેંકો "x"
+        }
+        પ્રયત્ન {
+            await_value()
+        } ભૂલ err {
+            લખો(err)
+        }
+    }
+}
+"#;
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+}
+
+#[test]
+fn parses_conditional_and_compound_assignment() {
+    let source = "બદલ x: પૂર્ણાંક = 1
+x += x > 0 ? 2 : 3";
+    let (tokens, lex_diagnostics) = Lexer::new(source).lex();
+    assert!(lex_diagnostics.is_empty(), "{lex_diagnostics:#?}");
+    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::PlusEqual)));
+
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+}
+
+#[test]
+fn preserves_unary_expression_source_span() {
+    let source = "સ્થિર value = -x + y";
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+    match &program.declarations[0] {
+        Decl::Variable { value: Expr::Binary { left, .. }, .. } => match left.as_ref() {
+            Expr::Unary { span, .. } => assert_eq!(*span, tantra_compiler::diagnostic::Span::new(16, 18)),
+            other => panic!("expected unary expression, got {other:?}"),
+        },
+        other => panic!("unexpected AST: {other:?}"),
+    }
+}
