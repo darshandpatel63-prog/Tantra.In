@@ -110,10 +110,9 @@ impl<'a> Lexer<'a> {
         let raw = &self.source[self.offset(start)..self.offset(self.position())];
         let normalized: String = raw.nfc().collect();
 
-        if let Some((character, prototype)) = normalized
-            .chars()
-            .find_map(|character| confusable_ascii_prototype(character).map(|prototype| (character, prototype)))
-        {
+        if let Some((character, prototype)) = normalized.chars().find_map(|character| {
+            confusable_ascii_prototype(character).map(|prototype| (character, prototype))
+        }) {
             self.diagnostics.push(Diagnostic::error(
                 "T0011",
                 format!(
@@ -139,8 +138,7 @@ impl<'a> Lexer<'a> {
                 {
                     self.advance();
                 }
-                let digits =
-                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                let digits = &self.source[self.offset(digits_start)..self.offset(self.position())];
                 if !valid_digit_sequence(digits, |c| c.is_ascii_hexdigit()) {
                     malformed = true;
                 }
@@ -213,8 +211,7 @@ impl<'a> Lexer<'a> {
             self.advance();
             let fraction_start = self.position();
             self.consume_digits(|c| c.is_ascii_digit() || c == '_');
-            let fraction =
-                &self.source[self.offset(fraction_start)..self.offset(self.position())];
+            let fraction = &self.source[self.offset(fraction_start)..self.offset(self.position())];
             if !valid_digit_sequence(fraction, |c| c.is_ascii_digit()) {
                 malformed = true;
             }
@@ -228,8 +225,7 @@ impl<'a> Lexer<'a> {
             }
             let exponent_start = self.position();
             self.consume_digits(|c| c.is_ascii_digit() || c == '_');
-            let exponent =
-                &self.source[self.offset(exponent_start)..self.offset(self.position())];
+            let exponent = &self.source[self.offset(exponent_start)..self.offset(self.position())];
             if !valid_digit_sequence(exponent, |c| c.is_ascii_digit()) {
                 malformed = true;
             }

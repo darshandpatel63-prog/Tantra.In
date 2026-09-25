@@ -106,7 +106,6 @@ fn unterminated_comment_is_diagnostic() {
     assert!(diagnostics.iter().any(|d| d.code == "T0008"));
 }
 
-
 #[test]
 fn normalizes_identifier_spelling_to_nfc() {
     let source = "સ્થિર cafe\u{0301} = 1";
