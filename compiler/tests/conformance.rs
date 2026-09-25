@@ -144,13 +144,13 @@ fn rejects_malformed_numeric_literals() {
 
 #[test]
 fn validates_string_and_character_escapes() {
-    let (_, string_diagnostics) = Lexer::new("\"bad\\\\q\"").lex();
+    let (_, string_diagnostics) = Lexer::new(r#""bad\q""#).lex();
     assert!(string_diagnostics.iter().any(|d| d.code == "T0004"));
 
-    let (_, character_diagnostics) = Lexer::new("'\\\\q'").lex();
+    let (_, character_diagnostics) = Lexer::new(r"'\q'").lex();
     assert!(character_diagnostics.iter().any(|d| d.code == "T0006"));
 
-    let (tokens, nul_diagnostics) = Lexer::new("'\\0'").lex();
+    let (tokens, nul_diagnostics) = Lexer::new("'\0'").lex();
     assert!(nul_diagnostics.is_empty(), "{nul_diagnostics:#?}");
     assert!(matches!(tokens[0].kind, TokenKind::Character('\0')));
 }
