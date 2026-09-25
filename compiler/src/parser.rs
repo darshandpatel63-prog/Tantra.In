@@ -672,7 +672,8 @@ impl Parser {
                     | TokenKind::If
                     | TokenKind::While
                     | TokenKind::For
-            ) && !same_variant(&self.previous().kind, self.peek_kind()) {
+            ) && !same_variant(&self.previous().kind, self.peek_kind())
+            {
                 return;
             }
             self.advance();
