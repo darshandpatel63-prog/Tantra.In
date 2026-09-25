@@ -451,7 +451,7 @@ impl Parser {
         }
 
         if self.match_kind(&TokenKind::LeftBrace) {
-            self.current -= 1;
+            self.current = self.current.saturating_sub(1);
             let block = self.block()?;
             return Some(Stmt::Decl(Decl::Module {
                 name: "<block>".to_owned(),
@@ -676,7 +676,9 @@ impl Parser {
                     | TokenKind::While
                     | TokenKind::For
             ) {
-                return;
+                if !same_variant(&self.previous().kind, self.peek_kind()) {
+                    return;
+                }
             }
             self.advance();
         }
