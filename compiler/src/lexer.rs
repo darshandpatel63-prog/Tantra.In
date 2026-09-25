@@ -344,9 +344,7 @@ fn is_identifier_start(c: char) -> bool {
 }
 
 fn is_identifier_continue(c: char) -> bool {
-    c == '_'
-        || c.is_alphanumeric()
-        || c.is_mark_nonspacing()
+    c == '_' || c.is_alphanumeric() || c.is_mark_nonspacing()
 }
 
 fn keyword(text: &str) -> Option<TokenKind> {
