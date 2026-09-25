@@ -122,7 +122,7 @@ impl<'a> Lexer<'a> {
             ));
         }
 
-        keyword(&normalized).unwrap_or_else(|| TokenKind::Identifier(normalized))
+        keyword(&normalized).unwrap_or(TokenKind::Identifier(normalized))
     }
 
     fn number(&mut self, start: usize, first: char) -> TokenKind {
