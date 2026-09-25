@@ -123,7 +123,15 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36104426869` passed all configured checks: rustfmt, cargo check, all conformance tests, and clippy.
+GitHub Actions CI run `36106832611` for commit `86579d7f09a0afd9b9841431b1afa0d7e0ae5a6f` completed successfully.
+
+Verified by GitHub Actions:
+- rustfmt check: passed
+- `cargo check --all-targets`: passed
+- `cargo test --all-targets`: passed — 11 conformance tests
+- `cargo clippy --all-targets -- -D warnings`: passed
+
+This is the current authoritative executable verification record.
 
 ## Verification State
 
@@ -146,21 +154,19 @@ No test result should be claimed until the workflow result is actually observed.
 No confirmed compiler bug has been established by execution yet because the new Rust implementation has not run in this environment.
 
 Known implementation risks:
-- The current confusable rule is intentionally conservative and only covers the lexer-level ASCII-confusable character case; broader UTS #39/mixed-script policy may require future tooling work.
+- The current UTS #39 confusable rule is intentionally conservative and only rejects the lexer-level non-ASCII cases whose skeleton reduces to a single ASCII alphanumeric; broader mixed-script/security policy remains future work.
 - Exact grammar coverage is still incomplete.
 - Source-span behavior needs an explicit regression suite.
-- Parser coverage is incomplete.
-- Some AST representations are provisional.
+- Parser coverage is incomplete and some AST representations are provisional.
 - CI/toolchain pinning needs hardening.
-- Initial lexer source-generation issue was corrected in commit `c36fdc6187a988cc1674a04def108ab308440604`; Rust execution still has not been verified.
 - Rust bootstrap-language choice should be formally reviewed.
-- Unicode normalization/confusable policy is still incomplete.
+- Production security is not proven by these lexical checks.
 
 ---
 
-## Post-Stage Correction
+## Historical Post-Stage Correction
 
-The initial Stage 002 commit contained an invalid Rust character-literal escape in `compiler/src/lexer.rs`. This was corrected immediately in commit `c36fdc6187a988cc1674a04def108ab308440604`. No Rust toolchain is available in the current execution environment, so compilation remains unverified.
+The initial Stage 002 implementation contained a generated Rust character-literal issue in `compiler/src/lexer.rs`. It was corrected during the Stage 002 verification sequence. The current compiler foundation is now verified through GitHub Actions; local Rust execution is still not available in the present environment.
 
 ## Next Stage
 
