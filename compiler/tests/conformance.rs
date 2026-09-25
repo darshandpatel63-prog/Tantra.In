@@ -182,8 +182,12 @@ fn parses_control_flow_and_error_handling_grammar() {
 
 #[test]
 fn parses_conditional_and_compound_assignment() {
-    let source = "બદલ x: પૂર્ણાંક = 1
-x += x > 0 ? 2 : 3";
+    let source = r#"
+કાર્ય test() {
+    બદલ x: પૂર્ણાંક = 1
+    x += x > 0 ? 2 : 3
+}
+"#;
     let (tokens, lex_diagnostics) = Lexer::new(source).lex();
     assert!(lex_diagnostics.is_empty(), "{lex_diagnostics:#?}");
     assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::PlusEqual)));
@@ -200,7 +204,7 @@ fn preserves_unary_expression_source_span() {
     let program = program.expect("program should parse");
     match &program.declarations[0] {
         Decl::Variable { value: Expr::Binary { left, .. }, .. } => match left.as_ref() {
-            Expr::Unary { span, .. } => assert_eq!(*span, tantra_compiler::diagnostic::Span::new(16, 18)),
+            Expr::Unary { span, .. } => assert_eq!(*span, tantra_compiler::diagnostic::Span::new(24, 26)),
             other => panic!("expected unary expression, got {other:?}"),
         },
         other => panic!("unexpected AST: {other:?}"),
