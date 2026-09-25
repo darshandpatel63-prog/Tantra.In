@@ -32,18 +32,6 @@ jobs:
       - name: Check
         run: cargo check --all-targets
       - name: Test
-        run: |
-          tests=(
-            lexes_core_gujarati_keywords_and_literals
-            lexes_nested_block_comments_and_operators
-            parser_builds_variable_and_function_ast
-            parser_reports_invalid_syntax_with_stable_code
-            parser_supports_calls_members_and_arrays
-            unterminated_comment_is_diagnostic
-          )
-          for test_name in "${tests[@]}"; do
-            echo "=== Running ${test_name} ==="
-            timeout 30s cargo test --test conformance "${test_name}" -- --nocapture --exact
-          done
+        run: cargo test --all-targets
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
