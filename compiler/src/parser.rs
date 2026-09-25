@@ -150,7 +150,11 @@ impl Parser {
             }
         }
 
-        let program = if self.diagnostics.iter().any(|d| d.severity == crate::diagnostic::Severity::Error) {
+        let program = if self
+            .diagnostics
+            .iter()
+            .any(|d| d.severity == crate::diagnostic::Severity::Error)
+        {
             None
         } else {
             Some(Program { declarations })
@@ -202,7 +206,11 @@ impl Parser {
         } else {
             None
         };
-        self.consume(&TokenKind::Equal, "T1004", "variable declarationમાં '=' expected");
+        self.consume(
+            &TokenKind::Equal,
+            "T1004",
+            "variable declarationમાં '=' expected",
+        );
         let value = self.expression()?;
         let end = self.optional_semicolon_end(value_span(&value));
         Some(Decl::Variable {
@@ -217,14 +225,22 @@ impl Parser {
     fn function(&mut self, public: bool, async_: bool) -> Option<Decl> {
         let name_token = self.consume_identifier("T1005", "function name expected")?;
         let name = self.identifier_text(&name_token);
-        self.consume(&TokenKind::LeftParen, "T1006", "function parameters માટે '(' expected");
+        self.consume(
+            &TokenKind::LeftParen,
+            "T1006",
+            "function parameters માટે '(' expected",
+        );
         let mut params = Vec::new();
 
         if !self.check(&TokenKind::RightParen) {
             loop {
                 let token = self.consume_identifier("T1007", "parameter name expected")?;
                 let ty = {
-                    self.consume(&TokenKind::Colon, "T1008", "parameter type માટે ':' expected");
+                    self.consume(
+                        &TokenKind::Colon,
+                        "T1008",
+                        "parameter type માટે ':' expected",
+                    );
                     self.type_ref()?
                 };
                 params.push(Param {
@@ -239,7 +255,11 @@ impl Parser {
             }
         }
 
-        self.consume(&TokenKind::RightParen, "T1009", "function parameters માટે ')' expected");
+        self.consume(
+            &TokenKind::RightParen,
+            "T1009",
+            "function parameters માટે ')' expected",
+        );
 
         let return_type = if self.match_kind(&TokenKind::Arrow) {
             Some(self.type_ref()?)
@@ -326,7 +346,11 @@ impl Parser {
                     break;
                 }
             }
-            self.consume(&TokenKind::Greater, "T1016", "generic type માટે '>' expected");
+            self.consume(
+                &TokenKind::Greater,
+                "T1016",
+                "generic type માટે '>' expected",
+            );
         }
 
         Some(TypeRef {
@@ -338,7 +362,9 @@ impl Parser {
 
     fn block(&mut self) -> Option<Block> {
         let open = self.consume(&TokenKind::LeftBrace, "T1017", "'{' expected");
-        let start = open.as_ref().map_or(self.peek().span.start, |t| t.span.start);
+        let start = open
+            .as_ref()
+            .map_or(self.peek().span.start, |t| t.span.start);
         let mut statements = Vec::new();
 
         while !self.check(&TokenKind::RightBrace) && !self.check(&TokenKind::Eof) {
@@ -517,7 +543,10 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Option<Expr> {
-        if matches!(self.peek_kind(), TokenKind::Bang | TokenKind::Plus | TokenKind::Minus) {
+        if matches!(
+            self.peek_kind(),
+            TokenKind::Bang | TokenKind::Plus | TokenKind::Minus
+        ) {
             let op = self.advance().kind.clone();
             let expr = self.unary()?;
             let span = Span::new(self.previous().span.start, value_span(&expr).end);
@@ -597,7 +626,10 @@ impl Parser {
             TokenKind::LeftParen => {
                 let expr = self.expression()?;
                 let close = self.consume(&TokenKind::RightParen, "T1025", "')' expected")?;
-                Some(Expr::Grouped(Box::new(expr), Span::new(token.span.start, close.span.end)))
+                Some(Expr::Grouped(
+                    Box::new(expr),
+                    Span::new(token.span.start, close.span.end),
+                ))
             }
             TokenKind::LeftBracket => {
                 let mut items = Vec::new();
@@ -610,7 +642,10 @@ impl Parser {
                     }
                 }
                 let close = self.consume(&TokenKind::RightBracket, "T1026", "']' expected")?;
-                Some(Expr::Array(items, Span::new(token.span.start, close.span.end)))
+                Some(Expr::Array(
+                    items,
+                    Span::new(token.span.start, close.span.end),
+                ))
             }
             _ => {
                 self.diagnostics.push(Diagnostic::error(
@@ -656,7 +691,12 @@ impl Parser {
         }
     }
 
-    fn consume(&mut self, expected: &TokenKind, code: &'static str, message: &'static str) -> Option<Token> {
+    fn consume(
+        &mut self,
+        expected: &TokenKind,
+        code: &'static str,
+        message: &'static str,
+    ) -> Option<Token> {
         if same_variant(self.peek_kind(), expected) {
             Some(self.advance())
         } else {
@@ -674,7 +714,8 @@ impl Parser {
     }
 
     fn error_here(&mut self, code: &'static str, message: &str) {
-        self.diagnostics.push(Diagnostic::error(code, message, self.peek().span));
+        self.diagnostics
+            .push(Diagnostic::error(code, message, self.peek().span));
     }
 
     fn identifier_text(&self, token: &Token) -> String {
@@ -730,7 +771,9 @@ fn binary_precedence(kind: &TokenKind) -> Option<(u8, bool)> {
         TokenKind::Caret => (4, false),
         TokenKind::Ampersand => (5, false),
         TokenKind::EqualEqual | TokenKind::NotEqual => (6, false),
-        TokenKind::Less | TokenKind::LessEqual | TokenKind::Greater | TokenKind::GreaterEqual => (7, false),
+        TokenKind::Less | TokenKind::LessEqual | TokenKind::Greater | TokenKind::GreaterEqual => {
+            (7, false)
+        }
         TokenKind::ShiftLeft | TokenKind::ShiftRight => (8, false),
         TokenKind::Plus | TokenKind::Minus => (9, false),
         TokenKind::Star | TokenKind::Slash | TokenKind::Percent => (10, false),
@@ -770,9 +813,7 @@ fn stmt_span(stmt: &Stmt) -> Span {
         | Stmt::Break(span)
         | Stmt::Continue(span)
         | Stmt::Empty(span) => *span,
-        Stmt::If { span, .. }
-        | Stmt::While { span, .. }
-        | Stmt::ForEach { span, .. } => *span,
+        Stmt::If { span, .. } | Stmt::While { span, .. } | Stmt::ForEach { span, .. } => *span,
         Stmt::Expr(expr) => value_span(expr),
     }
 }
