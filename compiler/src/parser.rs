@@ -212,7 +212,7 @@ impl Parser {
             "variable declarationમાં '=' expected",
         );
         let value = self.expression()?;
-        let end = self.optional_semicolon_end(value_span(&value));
+        let end = self.optional_semicolon_end(value_span(&value).end);
         Some(Decl::Variable {
             mutable,
             name,
@@ -404,7 +404,7 @@ impl Parser {
                 return Some(Stmt::Return(None, Span::new(start, end)));
             }
             let expr = self.expression()?;
-            let end = self.optional_semicolon_end(value_span(&expr));
+            let end = self.optional_semicolon_end(value_span(&expr).end);
             return Some(Stmt::Return(Some(expr), Span::new(start, end)));
         }
 
@@ -480,7 +480,7 @@ impl Parser {
             } else {
                 let block = self.block()?;
                 Some(Box::new(Stmt::Expr(Expr::Grouped(
-                    Expr::Null(block.span),
+                    Box::new(Expr::Null(block.span)),
                     block.span,
                 ))))
             }
