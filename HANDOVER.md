@@ -15,7 +15,7 @@
 
 **Stage:** 002 — Executable Conformance-Test Design and Lexer/Parser Foundation
 
-**Status:** Foundation implemented; CI verification pending.
+**Status:** Foundation implemented; CI verification pending; one lexer source-syntax correction applied after initial commit.
 
 ### Objective
 
@@ -148,9 +148,14 @@ Known implementation risks:
 - Parser coverage is incomplete.
 - Some AST representations are provisional.
 - CI/toolchain pinning needs hardening.
+- Initial lexer source-generation issue was corrected in commit `c36fdc6187a988cc1674a04def108ab308440604`; Rust execution still has not been verified.
 - Rust bootstrap-language choice should be formally reviewed.
 
 ---
+
+## Post-Stage Correction
+
+The initial Stage 002 commit contained an invalid Rust character-literal escape in `compiler/src/lexer.rs`. This was corrected immediately in commit `c36fdc6187a988cc1674a04def108ab308440604`. No Rust toolchain is available in the current execution environment, so compilation remains unverified.
 
 ## Next Stage
 
