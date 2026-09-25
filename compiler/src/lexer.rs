@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use unicode_ident::{is_xid_continue, is_xid_start};
+use unicode_normalization::UnicodeNormalization;
+use unicode_security::confusable_detection::char_confusable_prototype;
 
 use crate::diagnostic::{Diagnostic, Span};
 use crate::token::{Token, TokenKind};
@@ -105,36 +107,119 @@ impl<'a> Lexer<'a> {
             self.advance();
         }
 
-        let text = &self.source[self.offset(start)..self.offset(self.position())];
-        keyword(text).unwrap_or_else(|| TokenKind::Identifier(text.to_owned()))
+        let raw = &self.source[self.offset(start)..self.offset(self.position())];
+        let normalized: String = raw.nfc().collect();
+
+        if let Some((character, prototype)) = normalized
+            .chars()
+            .find_map(|character| confusable_ascii_prototype(character).map(|prototype| (character, prototype)))
+        {
+            self.diagnostics.push(Diagnostic::error(
+                "T0011",
+                format!(
+                    "identifierમાં confusable Unicode અક્ષર {character:?} છે; ASCII prototype {prototype:?} છે"
+                ),
+                Span::new(self.offset(start), self.offset(self.position())),
+            ));
+        }
+
+        keyword(&normalized).unwrap_or_else(|| TokenKind::Identifier(normalized))
     }
 
     fn number(&mut self, start: usize, first: char) -> TokenKind {
+        let mut malformed = false;
+
         if first == '0' {
             if matches!(self.peek(), Some('x' | 'X')) {
                 self.advance();
-                self.consume_digits(|c| c.is_ascii_hexdigit() || c == '_');
+                let digits_start = self.position();
+                while self
+                    .peek()
+                    .is_some_and(|c| c.is_ascii_alphanumeric() || c == '_')
+                {
+                    self.advance();
+                }
+                let digits =
+                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                if !valid_digit_sequence(digits, |c| c.is_ascii_hexdigit()) {
+                    malformed = true;
+                }
+                if self.peek().is_some_and(is_identifier_start) {
+                    malformed = true;
+                }
+                if malformed {
+                    self.report_invalid_number(start);
+                }
                 return TokenKind::Integer(self.lexeme(start).to_owned());
             }
+
             if matches!(self.peek(), Some('b' | 'B')) {
                 self.advance();
-                self.consume_digits(|c| matches!(c, '0' | '1' | '_'));
+                let digits_start = self.position();
+                while self
+                    .peek()
+                    .is_some_and(|c| c.is_ascii_alphanumeric() || c == '_')
+                {
+                    self.advance();
+                }
+                let digits =
+                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                if !valid_digit_sequence(digits, |c| matches!(c, '0' | '1')) {
+                    malformed = true;
+                }
+                if self.peek().is_some_and(is_identifier_start) {
+                    malformed = true;
+                }
+                if malformed {
+                    self.report_invalid_number(start);
+                }
                 return TokenKind::Integer(self.lexeme(start).to_owned());
             }
+
             if matches!(self.peek(), Some('o' | 'O')) {
                 self.advance();
-                self.consume_digits(|c| matches!(c, '0'..='7' | '_'));
+                let digits_start = self.position();
+                while self
+                    .peek()
+                    .is_some_and(|c| c.is_ascii_alphanumeric() || c == '_')
+                {
+                    self.advance();
+                }
+                let digits =
+                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                if !valid_digit_sequence(digits, |c| matches!(c, '0'..='7')) {
+                    malformed = true;
+                }
+                if self.peek().is_some_and(is_identifier_start) {
+                    malformed = true;
+                }
+                if malformed {
+                    self.report_invalid_number(start);
+                }
                 return TokenKind::Integer(self.lexeme(start).to_owned());
             }
         }
 
+        let integer_end_start = self.position();
         self.consume_digits(|c| c.is_ascii_digit() || c == '_');
+        let integer_part =
+            &self.source[self.offset(integer_end_start)..self.offset(self.position())];
+        if !valid_digit_sequence(integer_part, |c| c.is_ascii_digit()) {
+            malformed = true;
+        }
+
         let mut is_float = false;
 
         if self.peek() == Some('.') && self.peek_next().is_some_and(|c| c.is_ascii_digit()) {
             is_float = true;
             self.advance();
+            let fraction_start = self.position();
             self.consume_digits(|c| c.is_ascii_digit() || c == '_');
+            let fraction =
+                &self.source[self.offset(fraction_start)..self.offset(self.position())];
+            if !valid_digit_sequence(fraction, |c| c.is_ascii_digit()) {
+                malformed = true;
+            }
         }
 
         if matches!(self.peek(), Some('e' | 'E')) {
@@ -143,7 +228,21 @@ impl<'a> Lexer<'a> {
             if matches!(self.peek(), Some('+' | '-')) {
                 self.advance();
             }
+            let exponent_start = self.position();
             self.consume_digits(|c| c.is_ascii_digit() || c == '_');
+            let exponent =
+                &self.source[self.offset(exponent_start)..self.offset(self.position())];
+            if !valid_digit_sequence(exponent, |c| c.is_ascii_digit()) {
+                malformed = true;
+            }
+        }
+
+        if self.peek().is_some_and(is_identifier_start) {
+            malformed = true;
+        }
+
+        if malformed {
+            self.report_invalid_number(start);
         }
 
         let value = self.lexeme(start).to_owned();
@@ -152,6 +251,14 @@ impl<'a> Lexer<'a> {
         } else {
             TokenKind::Integer(value)
         }
+    }
+
+    fn report_invalid_number(&mut self, start: usize) {
+        self.diagnostics.push(Diagnostic::error(
+            "T0009",
+            "અમાન્ય numeric literal",
+            Span::new(self.offset(start), self.offset(self.position())),
+        ));
     }
 
     fn string(&mut self, start: usize) -> TokenKind {
@@ -347,6 +454,33 @@ fn is_identifier_start(c: char) -> bool {
 
 fn is_identifier_continue(c: char) -> bool {
     c == '_' || is_xid_continue(c)
+}
+
+fn valid_digit_sequence<F>(text: &str, predicate: F) -> bool
+where
+    F: Fn(char) -> bool,
+{
+    !text.is_empty()
+        && !text.starts_with('_')
+        && !text.ends_with('_')
+        && !text.contains("__")
+        && text.chars().all(|c| c == '_' || predicate(c))
+}
+
+fn confusable_ascii_prototype(character: char) -> Option<char> {
+    if character.is_ascii() || !character.is_alphanumeric() {
+        return None;
+    }
+
+    let prototype = char_confusable_prototype(character)?;
+    if prototype.len() == 1 {
+        let candidate = prototype[0];
+        if candidate.is_ascii_alphanumeric() {
+            return Some(candidate);
+        }
+    }
+
+    None
 }
 
 fn keyword(text: &str) -> Option<TokenKind> {

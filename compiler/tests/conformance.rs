@@ -105,3 +105,49 @@ fn unterminated_comment_is_diagnostic() {
     let (_, diagnostics) = Lexer::new("/* missing").lex();
     assert!(diagnostics.iter().any(|d| d.code == "T0008"));
 }
+
+
+#[test]
+fn normalizes_identifier_spelling_to_nfc() {
+    let source = "સ્થિર cafe\\u{0301} = 1";
+    let (tokens, diagnostics) = Lexer::new(source).lex();
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    assert!(matches!(
+        &tokens[1].kind,
+        TokenKind::Identifier(name) if name == "café"
+    ));
+}
+
+#[test]
+fn rejects_uts39_ascii_confusable_identifier_characters() {
+    let source = "સ્થિર раy = 1";
+    let (_, diagnostics) = Lexer::new(source).lex();
+    assert!(diagnostics.iter().any(|d| d.code == "T0011"));
+}
+
+#[test]
+fn accepts_valid_numeric_literals_and_separators() {
+    let source = "1_000 0xCA_FE 0b1010_0101 0o755_123 3.141_592 6.02e23";
+    let (_, diagnostics) = Lexer::new(source).lex();
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+}
+
+#[test]
+fn rejects_malformed_numeric_literals() {
+    for source in ["0x", "0b102", "0o89", "1__2", "1_e2", "1e+", "123abc"] {
+        let (_, diagnostics) = Lexer::new(source).lex();
+        assert!(
+            diagnostics.iter().any(|d| d.code == "T0009"),
+            "expected T0009 for {source:?}, got {diagnostics:#?}"
+        );
+    }
+}
+
+#[test]
+fn validates_string_and_character_escapes() {
+    let (_, string_diagnostics) = Lexer::new("\"bad\\\\q\"").lex();
+    assert!(string_diagnostics.iter().any(|d| d.code == "T0004"));
+
+    let (_, character_diagnostics) = Lexer::new("'\\\\q'").lex();
+    assert!(character_diagnostics.iter().any(|d| d.code == "T0006"));
+}

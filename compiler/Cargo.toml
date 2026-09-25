@@ -15,3 +15,5 @@ path = "src/bin/tantra.rs"
 
 [dependencies]
 unicode-ident = "1"
+unicode-normalization = "0.1.25"
+unicode-security = "0.1.2"

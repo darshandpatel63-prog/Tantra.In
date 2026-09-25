@@ -146,9 +146,9 @@ No test result should be claimed until the workflow result is actually observed.
 No confirmed compiler bug has been established by execution yet because the new Rust implementation has not run in this environment.
 
 Known implementation risks:
-- Unicode NFC normalization is not yet enforced.
-- Unicode confusable detection is not yet implemented.
-- Numeric literal validation is incomplete.
+- The current confusable rule is intentionally conservative and only covers the lexer-level ASCII-confusable character case; broader UTS #39/mixed-script policy may require future tooling work.
+- Exact grammar coverage is still incomplete.
+- Source-span behavior needs an explicit regression suite.
 - Parser coverage is incomplete.
 - Some AST representations are provisional.
 - CI/toolchain pinning needs hardening.
@@ -168,12 +168,10 @@ The initial Stage 002 commit contained an invalid Rust character-literal escape 
 
 Primary objectives:
 1. Observe and fix CI failures — **completed for the current foundation**.
-2. Expand lexical negative tests.
-3. Expand exact grammar tests.
-4. Implement Unicode normalization/confusable policy.
-5. Validate numeric and escape syntax.
-6. Improve source-span accuracy.
-7. Improve parser error recovery.
+2. Expand exact grammar tests.
+3. Audit and expand Unicode security policy beyond the current lexer rule.
+4. Improve source-span accuracy with regression tests.
+5. Improve parser error recovery and cascade suppression.
 8. Begin name resolution.
 9. Begin primitive type checking.
 

@@ -20,10 +20,11 @@ This document converts the existing master blueprint into an implementation-orie
 
 ## 3. Source and lexical rules
 - Source encoding: UTF-8.
-- Identifier normalization: NFC.
+- Identifier normalization: NFC. The lexer canonicalizes each identifier token to NFC while preserving the original byte span.
 - Identifiers are case-sensitive.
 - Control characters are forbidden in identifiers.
-- Unicode confusable detection is a security/tooling requirement.
+- A conservative UTS #39 confusable policy is enforced in the lexer: a non-ASCII identifier character whose confusable prototype is a single ASCII alphanumeric is rejected.
+- Unicode confusable detection remains a broader tooling/security area beyond this lexical baseline.
 - Line comments use //.
 - Block comments use /* ... */ and may nest.
 - Whitespace is insignificant except inside literals/comments.
@@ -38,7 +39,12 @@ This document converts the existing master blueprint into an implementation-orie
 - Floating point: decimal/exponent notation.
 - Character: single quotes.
 - String: double quotes.
-- Numeric separators using underscore are allowed.
+- Supported string escapes: \\n, \\r, \\t, \\", \\\\, \\0.
+- Supported character escapes: \\n, \\r, \\t, \\', \\\\, \\0.
+- Numeric separators using underscore are allowed only between digits; leading, trailing and repeated underscores are invalid.
+- Prefixed integer literals must contain at least one valid base digit and cannot contain digits/letters outside the selected radix.
+- Decimal exponent notation must contain at least one digit after the optional sign.
+- Malformed numeric literals are rejected with stable diagnostic code T0009.
 
 ## 6. Operators and precedence
 Highest to lowest:
