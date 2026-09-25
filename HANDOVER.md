@@ -257,3 +257,32 @@ Older stage handovers should be preserved under:
 `handover/STAGE-XXX-handover.md`
 
 Do not overwrite historical stage records.
+
+
+# STAGE 001 UPDATE — 2026-09-25
+
+## Current Stage
+Stage 001 — Formal Language Specification
+
+## Completed
+- Repository-wide tree inspection completed before changes.
+- Project-control files read: TANTRA_BLUEPRINT.md, HOW_TO_WORK.md, COMMON_INSTRUCTIONS.md, AGENTS.md, HANDOVER.md.
+- Created TANTRA_LANGUAGE_SPEC_V0.1.md as the first concrete core-language specification.
+- The specification defines lexical rules, keywords, literals, operators, variables, functions, control flow, modules, types, Option/Result, async, memory/resource safety, capabilities, diagnostics, grammar baseline, name resolution, type checking, security invariants and conformance requirements.
+- Created the first historical handover: handover/STAGE-001-handover.md.
+
+## Verification
+No executable compiler tests were run because no compiler/test infrastructure exists yet. The repository state was inspected before creating new files.
+
+## Current State
+The language is specified, not implemented. No production compiler, runtime, standard library, CI workflow or release exists yet.
+
+## Known Technical Debt
+- Validate v0.1 grammar with an actual lexer/parser.
+- Add executable Unicode/confusable tests.
+- Add numeric overflow conformance tests.
+- Specify unsafe/FFI security boundary.
+- Decide bootstrap implementation language.
+
+## Next Action
+Stage 002 — Executable Conformance-Test Design and Lexer/Parser Foundation.
