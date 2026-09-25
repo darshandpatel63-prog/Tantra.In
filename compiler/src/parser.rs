@@ -508,10 +508,7 @@ impl Parser {
     fn parse_precedence(&mut self, min_prec: u8) -> Option<Expr> {
         let mut left = self.unary()?;
 
-        loop {
-            let Some((prec, right_assoc)) = binary_precedence(self.peek_kind()) else {
-                break;
-            };
+        while let Some((prec, right_assoc)) = binary_precedence(self.peek_kind()) {
             if prec < min_prec {
                 break;
             }
@@ -675,10 +672,8 @@ impl Parser {
                     | TokenKind::If
                     | TokenKind::While
                     | TokenKind::For
-            ) {
-                if !same_variant(&self.previous().kind, self.peek_kind()) {
-                    return;
-                }
+            ) && !same_variant(&self.previous().kind, self.peek_kind()) {
+                return;
             }
             self.advance();
         }
