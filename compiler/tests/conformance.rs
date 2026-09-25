@@ -59,7 +59,9 @@ fn parser_builds_variable_and_function_ast() {
     }
 
     match &program.declarations[1] {
-        Decl::Function { name, public, body, .. } => {
+        Decl::Function {
+            name, public, body, ..
+        } => {
             assert_eq!(name, "ઉમેરો");
             assert!(*public);
             assert_eq!(body.statements.len(), 1);
@@ -72,7 +74,9 @@ fn parser_builds_variable_and_function_ast() {
 fn parser_reports_invalid_syntax_with_stable_code() {
     let source = "સ્થિર x: = 10";
     let (_, diagnostics) = tantra_compiler::parse_source(source);
-    assert!(diagnostics.iter().any(|d| d.code == "T1015" && d.severity == Severity::Error));
+    assert!(diagnostics
+        .iter()
+        .any(|d| d.code == "T1015" && d.severity == Severity::Error));
 }
 
 #[test]
@@ -88,7 +92,10 @@ fn parser_supports_calls_members_and_arrays() {
     let program = program.expect("program should parse");
 
     match &program.declarations[2] {
-        Decl::Variable { value: Expr::Call { .. }, .. } => {}
+        Decl::Variable {
+            value: Expr::Call { .. },
+            ..
+        } => {}
         other => panic!("expected call expression, got {other:?}"),
     }
 }
