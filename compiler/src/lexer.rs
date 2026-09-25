@@ -203,7 +203,7 @@ impl<'a> Lexer<'a> {
                 Some('r') => '\r',
                 Some('t') => '\t',
                 Some('\\') => '\\',
-                Some(''') => ''',
+                Some('\\'') => '\\'',
                 Some(other) => {
                     self.diagnostics.push(Diagnostic::error(
                         "T0006",
