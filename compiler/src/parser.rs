@@ -559,7 +559,11 @@ impl Parser {
         let condition = self.parse_precedence(0)?;
         if self.match_kind(&TokenKind::Question) {
             let then_expr = self.assignment()?;
-            self.consume(&TokenKind::Colon, "T1030", "':' expected in conditional expression")?;
+            self.consume(
+                &TokenKind::Colon,
+                "T1030",
+                "':' expected in conditional expression",
+            )?;
             let else_expr = self.assignment()?;
             let span = Span::new(value_span(&condition).start, value_span(&else_expr).end);
             return Some(Expr::Conditional {

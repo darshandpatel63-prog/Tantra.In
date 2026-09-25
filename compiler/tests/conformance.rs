@@ -190,7 +190,9 @@ fn parses_conditional_and_compound_assignment() {
 "#;
     let (tokens, lex_diagnostics) = Lexer::new(source).lex();
     assert!(lex_diagnostics.is_empty(), "{lex_diagnostics:#?}");
-    assert!(tokens.iter().any(|t| matches!(t.kind, TokenKind::PlusEqual)));
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(t.kind, TokenKind::PlusEqual)));
 
     let (_, diagnostics) = tantra_compiler::parse_source(source);
     assert!(diagnostics.is_empty(), "{diagnostics:#?}");
@@ -203,8 +205,13 @@ fn preserves_unary_expression_source_span() {
     assert!(diagnostics.is_empty(), "{diagnostics:#?}");
     let program = program.expect("program should parse");
     match &program.declarations[0] {
-        Decl::Variable { value: Expr::Binary { left, .. }, .. } => match left.as_ref() {
-            Expr::Unary { span, .. } => assert_eq!(*span, tantra_compiler::diagnostic::Span::new(24, 26)),
+        Decl::Variable {
+            value: Expr::Binary { left, .. },
+            ..
+        } => match left.as_ref() {
+            Expr::Unary { span, .. } => {
+                assert_eq!(*span, tantra_compiler::diagnostic::Span::new(24, 26))
+            }
             other => panic!("expected unary expression, got {other:?}"),
         },
         other => panic!("unexpected AST: {other:?}"),
