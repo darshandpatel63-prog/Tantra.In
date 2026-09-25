@@ -131,3 +131,10 @@ Priority:
 
 ## Post-Stage Correction
 A generated Rust character-literal escape in `compiler/src/lexer.rs` was corrected immediately after the stage commit. Compilation remains unverified because the current execution environment has no Rust toolchain.
+
+
+## Final Stage 002 Verification
+After post-stage corrections, GitHub Actions CI run `36104426869` completed successfully. Rustfmt, cargo check, all six conformance tests, and Clippy passed. Stage 002 foundation is therefore verified through CI.
+
+## Stage 003 Started
+The first Stage 003 hardening work replaced the incomplete Unicode identifier heuristic with Unicode XID rules using `unicode-ident`, and parser recovery was hardened against infinite loops. Unicode NFC normalization and confusable detection remain future work in Stage 003.
