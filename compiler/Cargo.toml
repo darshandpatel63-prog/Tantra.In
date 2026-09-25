@@ -1,0 +1,16 @@
+[package]
+name = "tantra-compiler"
+version = "0.1.0"
+edition = "2021"
+description = "Tantra programming language compiler foundation"
+license = "MIT"
+
+[lib]
+name = "tantra_compiler"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tantra"
+path = "src/bin/tantra.rs"
+
+[dependencies]

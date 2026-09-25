@@ -13,276 +13,201 @@
 
 ## Current Stage
 
-**Stage:** 000 — Project Control System / Foundation Documentation
+**Stage:** 002 — Executable Conformance-Test Design and Lexer/Parser Foundation
 
-**Status:** In progress / foundation setup
+**Status:** Foundation implemented; CI verification pending.
 
 ### Objective
 
-Establish persistent project memory and a repeatable workflow so future Tantra development chats can continue from repository state without requiring the user to reconstruct previous conversations.
+Move Tantra from a written language specification into the first executable compiler foundation while preserving security, diagnostics, testability and future self-hosting options.
 
 ---
 
-## Completed Before This Stage
-
-The repository already contains:
-
-- `TANTRA_BLUEPRINT.md`
-- `.mangalacharan`
-
-The master blueprint defines the intended long-term Tantra scope, including:
-
-- general-purpose programming
-- UI
-- frontend/backend
-- security-first architecture
-- compiler
-- diagnostics
-- web/Wasm/native targets
-- AI/math
-- 1D/2D/3D graphics
-- animation/VFX
-- networking
-- databases
-- package ecosystem
-- testing/fuzzing
-- developer tooling
-- reproducible builds
-- self-hosting
-- GitHub/deployment integration
-
----
-
-## This Stage Adds
-
-The project-control system:
-
-- `HOW_TO_WORK.md`
-- `COMMON_INSTRUCTIONS.md`
-- `AGENTS.md`
-- `HANDOVER.md`
-
-These files establish:
-
-- new-chat continuation
-- repository-as-persistent-memory
-- dynamic multi-agent orchestration
-- stage handovers
-- bug/state tracking
-- direct GitHub development workflow
-- CI/workflow/release/PR management rules
-- security and verification requirements
-
----
-
-## Current Architecture State
-
-### Language
-
-Tantra remains in the planning/specification phase.
-
-### Compiler
-
-No production compiler implementation has been established yet.
-
-### Runtime
-
-Not yet implemented.
-
-### Standard Library
-
-Not yet implemented.
-
-### UI
-
-Architecturally planned in the master blueprint; implementation not yet established.
-
-### Graphics
-
-Architecturally planned in the master blueprint; implementation not yet established.
-
-### AI/Math
-
-Architecturally planned in the master blueprint; implementation not yet established.
-
-### Security
-
-Security-first architecture is specified at the blueprint level; implementation/audit evidence does not yet establish production security.
-
----
-
-## Known Bugs
-
-No implementation-level bug list exists yet because the production implementation has not started.
-
-Any future discovered bug must be recorded with:
-
-- ID
-- severity
-- component
-- reproduction
-- root cause
-- status
-- regression test
-
----
-
-## Known Technical Debt
-
-1. The language specification still needs to be derived formally from the master blueprint.
-2. Exact Tantra syntax has not been finalized.
-3. Exact grammar has not been finalized.
-4. Type-system specification has not been finalized.
-5. Memory/resource model has not been finalized.
-6. Security/capability model requires formal specification.
-7. Compiler architecture needs implementation-level decomposition.
-8. Testing strategy needs executable infrastructure.
-9. CI needs to be established as implementation begins.
-10. Release/versioning policy needs to be finalized before the first public release.
-
----
-
-## Current GitHub State
-
-At the time this handover was prepared, the repository contains the master blueprint and project-control documentation.
-
-The current commit SHA should be updated after the documentation commit is created.
-
----
-
-## Workflow State
-
-GitHub Actions workflow infrastructure is not yet established as a production compiler CI system.
-
-When implementation starts, CI should progressively cover:
-
-- formatting
-- compile/check
-- unit tests
-- integration tests
-- security checks
-- dependency checks
-- fuzzing where appropriate
-- benchmark/regression checks
-- artifact builds
-
----
-
-## Release State
-
-No stable Tantra language release exists yet.
-
-Versioning and release automation should be introduced when the first releasable implementation exists.
-
----
-
-## Next Recommended Stage
+## Completed Stages
 
 ### Stage 001 — Formal Language Specification
+Completed:
+- `TANTRA_LANGUAGE_SPEC_V0.1.md`
+- initial v0.1 grammar baseline
+- lexical/type/control-flow/capability/diagnostic/security contracts
+- Stage 001 handover
+
+### Stage 002 — Lexer/Parser Foundation
+Completed:
+- Rust workspace foundation
+- lexer
+- token model
+- diagnostics
+- parser/AST foundation
+- executable conformance tests
+- initial GitHub Actions CI
+- compact repository/new-chat Common Instructions
+
+---
+
+## Current Repository Structure
+
+```
+.
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── .mangalacharan
+├── AGENTS.md
+├── COMMON_INSTRUCTIONS.md
+├── HANDOVER.md
+├── HOW_TO_WORK.md
+├── TANTRA_BLUEPRINT.md
+├── TANTRA_LANGUAGE_SPEC_V0.1.md
+├── Cargo.toml
+├── compiler/
+│   ├── Cargo.toml
+│   ├── src/
+│   │   ├── bin/tantra.rs
+│   │   ├── diagnostic.rs
+│   │   ├── lexer.rs
+│   │   ├── lib.rs
+│   │   ├── parser.rs
+│   │   └── token.rs
+│   └── tests/
+│       └── conformance.rs
+└── handover/
+    ├── STAGE-001-handover.md
+    └── STAGE-002-handover.md
+```
+
+---
+
+## Implementation State
+
+### Language
+Specified at v0.1 baseline.
+
+### Compiler
+**Partially implemented.**
+
+Current executable foundation:
+- UTF-8 lexer
+- tokens
+- source spans
+- lexical diagnostics
+- parser
+- AST
+- basic CLI syntax-check command
+
+### Runtime
+Not implemented.
+
+### Standard Library
+Not implemented.
+
+### Type System
+Specification exists; semantic type checker not implemented.
+
+### Capability System
+Specification exists; capability checker not implemented.
+
+### UI
+Blueprint/specification stage only.
+
+### Graphics / Animation / VFX
+Blueprint/specification stage only.
+
+### AI / Mathematics
+Blueprint/specification stage only.
+
+### Security
+Security-first architecture and v0.1 invariants are specified. Production security is **not proven**.
+
+---
+
+## Verification State
+
+The Rust toolchain is not installed in the current execution environment.
+
+Therefore:
+- local Rust compilation: **not run**
+- local Rust tests: **not run**
+- local clippy: **not run**
+- local rustfmt check: **not run**
+
+GitHub Actions CI has been added as the intended verification mechanism.
+
+No test result should be claimed until the workflow result is actually observed.
+
+---
+
+## Known Bugs / Risks
+
+No confirmed compiler bug has been established by execution yet because the new Rust implementation has not run in this environment.
+
+Known implementation risks:
+- Unicode NFC normalization is not yet enforced.
+- Unicode confusable detection is not yet implemented.
+- Numeric literal validation is incomplete.
+- Parser coverage is incomplete.
+- Some AST representations are provisional.
+- CI/toolchain pinning needs hardening.
+- Rust bootstrap-language choice should be formally reviewed.
+
+---
+
+## Next Stage
+
+### Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 Primary objectives:
-
-1. Define language goals and non-goals.
-2. Define lexical structure.
-3. Define exact syntax.
-4. Define grammar.
-5. Define literals.
-6. Define identifiers.
-7. Define declarations.
-8. Define expressions.
-9. Define control flow.
-10. Define functions.
-11. Define modules.
-12. Define type system.
-13. Define error model.
-14. Define concurrency model.
-15. Define memory/resource model.
-16. Define capability/security model.
-17. Define diagnostics format.
-18. Define compatibility/interoperability model.
-19. Create executable examples.
-20. Define conformance tests.
+1. Observe and fix CI failures.
+2. Expand lexical negative tests.
+3. Expand exact grammar tests.
+4. Implement Unicode normalization/confusable policy.
+5. Validate numeric and escape syntax.
+6. Improve source-span accuracy.
+7. Improve parser error recovery.
+8. Begin name resolution.
+9. Begin primitive type checking.
 
 ---
 
 ## Important Continuation Rule
 
-A future Tantra chat should start with:
+A new Tantra chat should start with:
 
 > **Start**
 
-The AI must then:
+Then inspect the complete repository tree before creating or modifying anything.
 
-1. Read this handover.
-2. Read `COMMON_INSTRUCTIONS.md`.
-3. Read `AGENTS.md`.
-4. Read `HOW_TO_WORK.md`.
-5. Read `TANTRA_BLUEPRINT.md`.
-6. Inspect relevant repository code/specifications.
-7. Determine the actual current state.
-8. Continue from the current stage.
+After the inventory, read:
+1. `TANTRA_BLUEPRINT.md`
+2. `HOW_TO_WORK.md`
+3. `COMMON_INSTRUCTIONS.md`
+4. `AGENTS.md`
+5. `HANDOVER.md`
+6. latest relevant `handover/` file(s)
 
-The user should not need to recreate the previous conversation manually.
+Then inspect the relevant implementation/specification/tests/workflows and continue from the actual current state.
 
 ---
 
 ## Do Not Repeat
 
-Do not:
-
-- recreate the master blueprint from scratch
-- assume the compiler already exists
-- assume security is already proven
-- claim a release exists without verification
-- claim tests passed without running/checking them
-- discard existing requirements without documenting a deliberate change
-- ask the user to summarize the entire old chat when repository state can answer the question
-
----
-
-## Next-Chat Handoff
-
-**Start from Stage 001: Formal Language Specification, unless the repository state has advanced beyond it.**
-
-The repository state always takes precedence over this historical handover if later stage handovers show newer progress.
+- Do not recreate existing files/folders.
+- Do not recreate the compiler foundation.
+- Do not assume CI passed without checking its actual result.
+- Do not claim security is proven.
+- Do not claim the compiler is complete.
+- Do not remove blueprint requirements without documenting a deliberate decision.
+- Do not ask the user to reconstruct old chat context when repository state contains it.
 
 ---
 
 ## Handover Maintenance Rule
 
-This file must be updated whenever the active project state changes materially.
+At the end of every meaningful stage:
+- update `HANDOVER.md`
+- create `handover/STAGE-XXX-handover.md`
+- record tests/verification honestly
+- record known bugs/risks
+- record the exact next stage
 
-Older stage handovers should be preserved under:
-
-`handover/STAGE-XXX-handover.md`
-
-Do not overwrite historical stage records.
-
-
-# STAGE 001 UPDATE — 2026-09-25
-
-## Current Stage
-Stage 001 — Formal Language Specification
-
-## Completed
-- Repository-wide tree inspection completed before changes.
-- Project-control files read: TANTRA_BLUEPRINT.md, HOW_TO_WORK.md, COMMON_INSTRUCTIONS.md, AGENTS.md, HANDOVER.md.
-- Created TANTRA_LANGUAGE_SPEC_V0.1.md as the first concrete core-language specification.
-- The specification defines lexical rules, keywords, literals, operators, variables, functions, control flow, modules, types, Option/Result, async, memory/resource safety, capabilities, diagnostics, grammar baseline, name resolution, type checking, security invariants and conformance requirements.
-- Created the first historical handover: handover/STAGE-001-handover.md.
-
-## Verification
-No executable compiler tests were run because no compiler/test infrastructure exists yet. The repository state was inspected before creating new files.
-
-## Current State
-The language is specified, not implemented. No production compiler, runtime, standard library, CI workflow or release exists yet.
-
-## Known Technical Debt
-- Validate v0.1 grammar with an actual lexer/parser.
-- Add executable Unicode/confusable tests.
-- Add numeric overflow conformance tests.
-- Specify unsafe/FFI security boundary.
-- Decide bootstrap implementation language.
-
-## Next Action
-Stage 002 — Executable Conformance-Test Design and Lexer/Parser Foundation.
+Historical handovers must not be overwritten.
