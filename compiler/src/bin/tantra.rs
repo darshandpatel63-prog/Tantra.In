@@ -29,7 +29,10 @@ fn main() {
         );
     }
 
-    if diagnostics.iter().any(|d| d.severity == tantra_compiler::diagnostic::Severity::Error) {
+    if diagnostics
+        .iter()
+        .any(|d| d.severity == tantra_compiler::diagnostic::Severity::Error)
+    {
         process::exit(1);
     }
 
