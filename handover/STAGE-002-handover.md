@@ -127,3 +127,7 @@ Priority:
 - Do not recreate the initial lexer/parser from scratch.
 - Do not claim Rust tests passed until CI or a local Rust toolchain actually runs them.
 - Do not treat the parser as the full compiler.
+
+
+## Post-Stage Correction
+A generated Rust character-literal escape in `compiler/src/lexer.rs` was corrected immediately after the stage commit. Compilation remains unverified because the current execution environment has no Rust toolchain.
