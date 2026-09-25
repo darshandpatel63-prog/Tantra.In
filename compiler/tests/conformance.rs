@@ -156,7 +156,7 @@ fn validates_string_and_character_escapes() {
 }
 
 #[test]
-fn parses_control_flow_and_error_handling_grammar {
+fn parses_control_flow_and_error_handling_grammar() {
     let source = r#"
 કાર્ય run(items: Array<પૂર્ણાંક>) {
     જ્યારે સાચું {
