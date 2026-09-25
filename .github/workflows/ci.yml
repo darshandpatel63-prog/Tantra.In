@@ -32,6 +32,6 @@ jobs:
       - name: Check
         run: cargo check --all-targets
       - name: Test
-        run: cargo test --all-targets
+        run: cargo test --all-targets -- --nocapture --test-threads=1
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
