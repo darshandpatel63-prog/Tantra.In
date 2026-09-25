@@ -465,7 +465,7 @@ impl Parser {
         }
 
         let expr = self.expression()?;
-        self.optional_semicolon_end(value_span(&expr));
+        self.optional_semicolon_end(value_span(&expr).end);
         Some(Stmt::Expr(expr))
     }
 
