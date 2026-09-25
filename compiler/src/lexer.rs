@@ -200,10 +200,8 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        let integer_end_start = self.position();
         self.consume_digits(|c| c.is_ascii_digit() || c == '_');
-        let integer_part =
-            &self.source[self.offset(integer_end_start)..self.offset(self.position())];
+        let integer_part = self.lexeme(start);
         if !valid_digit_sequence(integer_part, |c| c.is_ascii_digit()) {
             malformed = true;
         }
@@ -314,6 +312,7 @@ impl<'a> Lexer<'a> {
                 Some('n') => '\n',
                 Some('r') => '\r',
                 Some('t') => '\t',
+                Some('0') => '\0',
                 Some('\\') => '\\',
                 Some('\'') => '\'',
                 Some(other) => {

@@ -109,7 +109,7 @@ fn unterminated_comment_is_diagnostic() {
 
 #[test]
 fn normalizes_identifier_spelling_to_nfc() {
-    let source = "સ્થિર cafe\\u{0301} = 1";
+    let source = "સ્થિર cafe\u{0301} = 1";
     let (tokens, diagnostics) = Lexer::new(source).lex();
     assert!(diagnostics.is_empty(), "{diagnostics:#?}");
     assert!(matches!(
@@ -150,4 +150,8 @@ fn validates_string_and_character_escapes() {
 
     let (_, character_diagnostics) = Lexer::new("'\\\\q'").lex();
     assert!(character_diagnostics.iter().any(|d| d.code == "T0006"));
+
+    let (tokens, nul_diagnostics) = Lexer::new("'\\0'").lex();
+    assert!(nul_diagnostics.is_empty(), "{nul_diagnostics:#?}");
+    assert!(matches!(tokens[0].kind, TokenKind::Character('\0')));
 }
