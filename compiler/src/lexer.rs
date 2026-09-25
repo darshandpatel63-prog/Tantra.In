@@ -465,7 +465,8 @@ fn confusable_ascii_prototype(character: char) -> Option<char> {
         return None;
     }
 
-    let mut chars = skeleton(&character.to_string());
+    let text = character.to_string();
+    let mut chars = skeleton(&text);
     let candidate = chars.next()?;
 
     if chars.next().is_none() && candidate.is_ascii_alphanumeric() {
