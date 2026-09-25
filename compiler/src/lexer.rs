@@ -160,8 +160,7 @@ impl<'a> Lexer<'a> {
                 {
                     self.advance();
                 }
-                let digits =
-                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                let digits = &self.source[self.offset(digits_start)..self.offset(self.position())];
                 if !valid_digit_sequence(digits, |c| matches!(c, '0' | '1')) {
                     malformed = true;
                 }
@@ -183,8 +182,7 @@ impl<'a> Lexer<'a> {
                 {
                     self.advance();
                 }
-                let digits =
-                    &self.source[self.offset(digits_start)..self.offset(self.position())];
+                let digits = &self.source[self.offset(digits_start)..self.offset(self.position())];
                 if !valid_digit_sequence(digits, |c| matches!(c, '0'..='7')) {
                     malformed = true;
                 }
