@@ -168,7 +168,10 @@ impl<'a> Lexer<'a> {
                         self.diagnostics.push(Diagnostic::error(
                             "T0004",
                             format!("અમાન્ય string escape: \\{other}"),
-                            Span::new(self.offset(self.position().saturating_sub(2)), self.offset(self.position())),
+                            Span::new(
+                                self.offset(self.position().saturating_sub(2)),
+                                self.offset(self.position()),
+                            ),
                         ));
                     }
                     None => break,
