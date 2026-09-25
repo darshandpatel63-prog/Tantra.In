@@ -32,7 +32,7 @@ fn lexes_nested_block_comments_and_operators() {
     assert!(matches!(tokens[0].kind, TokenKind::Identifier(_)));
     assert!(matches!(tokens[1].kind, TokenKind::Power));
     assert!(matches!(tokens[3].kind, TokenKind::NullCoalesce));
-    assert!(matches!(tokens[5].kind, TokenKind::AndAnd));
+    assert!(matches!(tokens[7].kind, TokenKind::AndAnd));
 }
 
 #[test]
