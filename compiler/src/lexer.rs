@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use unicode_ident::{is_xid_continue, is_xid_start};
+
 use crate::diagnostic::{Diagnostic, Span};
 use crate::token::{Token, TokenKind};
 
@@ -340,11 +342,11 @@ impl<'a> Lexer<'a> {
 }
 
 fn is_identifier_start(c: char) -> bool {
-    c == '_' || c.is_alphabetic()
+    c == '_' || is_xid_start(c)
 }
 
 fn is_identifier_continue(c: char) -> bool {
-    c == '_' || c.is_alphanumeric() || c.is_mark_nonspacing()
+    c == '_' || is_xid_continue(c)
 }
 
 fn keyword(text: &str) -> Option<TokenKind> {
