@@ -13,9 +13,9 @@
 
 ## Current Stage
 
-**Stage:** 002 — Executable Conformance-Test Design and Lexer/Parser Foundation
+**Stage:** 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
-**Status:** Foundation implemented; CI verification pending; one lexer source-syntax correction applied after initial commit.
+**Status:** Stage 002 foundation verified by GitHub CI; Stage 003 hardening has begun.
 
 ### Objective
 
@@ -121,6 +121,10 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ---
 
+## Latest Verification
+
+GitHub Actions CI run `36104426869` passed all configured checks: rustfmt, cargo check, all conformance tests, and clippy.
+
 ## Verification State
 
 The Rust toolchain is not installed in the current execution environment.
@@ -150,6 +154,7 @@ Known implementation risks:
 - CI/toolchain pinning needs hardening.
 - Initial lexer source-generation issue was corrected in commit `c36fdc6187a988cc1674a04def108ab308440604`; Rust execution still has not been verified.
 - Rust bootstrap-language choice should be formally reviewed.
+- Unicode normalization/confusable policy is still incomplete.
 
 ---
 
@@ -162,7 +167,7 @@ The initial Stage 002 commit contained an invalid Rust character-literal escape 
 ### Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 Primary objectives:
-1. Observe and fix CI failures.
+1. Observe and fix CI failures — **completed for the current foundation**.
 2. Expand lexical negative tests.
 3. Expand exact grammar tests.
 4. Implement Unicode normalization/confusable policy.
