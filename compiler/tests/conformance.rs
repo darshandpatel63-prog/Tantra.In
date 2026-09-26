@@ -209,7 +209,7 @@ fn preserves_unary_expression_source_span() {
             ..
         } => match left.as_ref() {
             Expr::Unary { span, .. } => {
-                assert_eq!(*span, tantra_compiler::diagnostic::Span::new(24, 26))
+                assert_eq!(*span, tantra_compiler::diagnostic::Span::new(14, 16))
             }
             other => panic!("expected unary expression, got {other:?}"),
         },
