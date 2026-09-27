@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `0b7cb2422c02c7f7bdb92d4942cc2ee782ff5469`
-- **Verification:** GitHub Actions run `36297155171` (run `59`) — success, 23/23 conformance tests
+- **Current commit:** `7607fe92ebde3afab7ca1477aba945df0e9b672c`
+- **Verification:** GitHub Actions run `36297363823` (run `66`) — success, 25/25 conformance tests
 
 ## Work Completed
 
@@ -34,7 +34,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 23 tests covering:
+The conformance suite now contains 25 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -56,6 +56,8 @@ The conformance suite now contains 23 tests covering:
 - expression precedence and right-associative assignment
 - explicit rejection of top-level statements in v0.1
 - parser recovery at a following control statement without a semicolon
+- documented struct fields and generic parameters
+- rejection of missing struct field types
 
 ## CI Verification
 
@@ -65,7 +67,7 @@ GitHub Actions run `36297155171` (run `59`) passed all configured gates:
 3. `cargo test --all-targets` — 23/23 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run additionally verified parser recovery synchronization at following control statements.
+The run additionally verified documented struct-field parsing and generic parameter parsing.
 
 ## Files Modified During This Stage
 
@@ -85,7 +87,7 @@ No duplicate implementation file or folder was created.
 ## Remaining Stage 003 Work
 
 1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF.
-2. Finalize `struct_type` only from the existing user-defined type example; do not invent enum syntax until an authoritative design is documented.
+2. Keep enum syntax provisional until an authoritative design decision; do not invent variant separators or enum spelling.
 3. Continue source-span and nested-syntax regression coverage.
 4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
 5. Audit Unicode security policy beyond the current conservative confusable rule.
