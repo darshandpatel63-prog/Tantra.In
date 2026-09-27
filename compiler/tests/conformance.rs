@@ -435,3 +435,45 @@ fn parser_recovers_at_following_control_statement_without_semicolon() {
         .count();
     assert_eq!(type_errors, 1, "{diagnostics:#?}");
 }
+
+#[test]
+fn parses_struct_type_fields_and_generic_parameters() {
+    let source = r#"
+રૂપ વ્યક્તિ<T> {
+    નામ: શબ્દ
+    ઉમર: પૂર્ણાંક
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Type {
+            name,
+            generic_params,
+            fields,
+            ..
+        } => {
+            assert_eq!(name, "વ્યક્તિ");
+            assert_eq!(generic_params, &vec!["T".to_owned()]);
+            assert_eq!(fields.len(), 2);
+            assert_eq!(fields[0].name, "નામ");
+            assert_eq!(fields[0].ty.name, "શબ્દ");
+            assert_eq!(fields[1].name, "ઉમર");
+            assert_eq!(fields[1].ty.name, "પૂર્ણાંક");
+        }
+        other => panic!("expected struct type declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn rejects_struct_type_missing_field_type() {
+    let source = r#"
+રૂપ વ્યક્તિ {
+    નામ:
+}
+"#;
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.iter().any(|d| d.code == "T1015" || d.code == "T1036"), "{diagnostics:#?}");
+}
