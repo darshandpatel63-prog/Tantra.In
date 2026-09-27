@@ -138,15 +138,19 @@ Example code: T1003 — Type mismatch.
 Diagnostics are part of the language/tooling API and must not leak secrets unnecessarily.
 
 ## 21. EBNF baseline
-program = { declaration | statement } ;
+program = { declaration } ;
 declaration = variable_decl | function_decl | type_decl | import_decl | module_decl ;
 variable_decl = (સ્થિર | બદલ) identifier [ : type ] = expression ;
 function_decl = [જાહેર] [async] કાર્ય identifier ( [parameters] ) [ -> type ] [capability_clause] block ;
 parameters = parameter { , parameter } ;
-parameter = identifier : type ;
 capability_clause = { ક્ષમતા capability_name } ;
+capability_name = identifier { . identifier } ;
+type = identifier [ type_arguments ] ;
+type_arguments = < type { , type } > ;
+generic_params = < identifier { , identifier } > ;
 type_decl = રૂપ identifier [generic_params] struct_type | રૂપ identifier [generic_params] enum_type ;
-statement = block | if_stmt | while_stmt | for_stmt | return_stmt | break_stmt | continue_stmt | try_stmt | expression_stmt ;
+module_decl = મોડ્યુલ identifier ;
+statement = block | if_stmt | while_stmt | for_stmt | return_stmt | break_stmt | continue_stmt | try_stmt | throw_stmt | expression_stmt ;
 block = { { declaration | statement } } ;
 if_stmt = જો expression block { નહીં જો expression block } [નહીં block] ;
 while_stmt = જ્યારે expression block ;
@@ -154,9 +158,12 @@ for_stmt = માટે દરેક identifier માં expression block ;
 return_stmt = પરત [expression] ;
 break_stmt = તોડો ;
 continue_stmt = આગળ ;
+try_stmt = પ્રયત્ન block ભૂલ identifier block ;
+throw_stmt = ફેંકો expression ;
 expression_stmt = expression ;
 expression = assignment ;
 assignment = conditional [assignment_operator assignment] ;
+assignment_operator = = | += | -= | *= | /= | %= ;
 conditional = null_coalesce [ ? expression : expression ] ;
 null_coalesce = logical_or { ?? logical_or } ;
 logical_or = logical_and { || logical_and } ;
@@ -166,11 +173,18 @@ comparison = additive { (< | <= | > | >=) additive } ;
 additive = multiplicative { (+ | -) multiplicative } ;
 multiplicative = exponent { (* | / | %) exponent } ;
 exponent = unary [ ** exponent ] ;
-unary = [! | + | -] postfix ;
+unary = [! | + | - | await] postfix ;
 postfix = primary { call | index | member } ;
 primary = literal | identifier | ( expression ) | array_literal ;
+literal = true_literal | false_literal | null_literal | integer_literal | float_literal | character_literal | string_literal ;
+array_literal = [ [ expression { , expression } ] ] ;
+true_literal = સાચું ;
+false_literal = ખોટું ;
+null_literal = શૂન્ય ;
 
-Note: lexical token definitions, exact Unicode identifier grammar and the complete operator grammar will be encoded in the executable parser tests before implementation is considered conforming.
+v0.1 top-level execution is intentionally deferred: statements are legal only inside blocks. The Program AST therefore stores declarations in source order. The struct_type and enum_type productions remain provisional until their field/variant separator rules are finalized; they are not yet considered executable grammar conformance requirements.
+
+Note: lexical token definitions, exact Unicode identifier grammar and the remaining provisional type grammar will be encoded in executable parser tests before implementation is considered conforming.
 
 ## 22. AST requirements
 AST nodes must preserve source spans, declaration order, mutability, capability declarations, async markers and type annotations required for diagnostics and later passes.
