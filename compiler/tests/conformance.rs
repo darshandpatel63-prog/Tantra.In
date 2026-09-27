@@ -236,7 +236,10 @@ fn parses_async_await_and_dotted_capabilities() {
             ..
         } => {
             assert!(*async_);
-            assert_eq!(capabilities, &vec!["network.read".to_owned(), "secrets.read".to_owned()]);
+            assert_eq!(
+                capabilities,
+                &vec!["network.read".to_owned(), "secrets.read".to_owned()]
+            );
             assert!(matches!(
                 body.statements.as_slice(),
                 [tantra_compiler::parser::Stmt::Return(
@@ -271,7 +274,9 @@ fn parses_all_compound_assignment_operators() {
         TokenKind::PercentEqual,
     ] {
         assert!(
-            tokens.iter().any(|token| std::mem::discriminant(&token.kind) == std::mem::discriminant(&kind)),
+            tokens
+                .iter()
+                .any(|token| std::mem::discriminant(&token.kind) == std::mem::discriminant(&kind)),
             "missing compound assignment token: {kind:?}"
         );
     }
@@ -303,7 +308,10 @@ fn preserves_original_unicode_identifier_span() {
     assert!(diagnostics.is_empty(), "{diagnostics:#?}");
     let start = "સ્થિર ".len();
     let end = "સ્થિર cafe\u{0301}".len();
-    assert_eq!(tokens[1].span, tantra_compiler::diagnostic::Span::new(start, end));
+    assert_eq!(
+        tokens[1].span,
+        tantra_compiler::diagnostic::Span::new(start, end)
+    );
 }
 
 #[test]
@@ -313,9 +321,15 @@ fn preserves_nested_expression_source_span() {
     assert!(diagnostics.is_empty(), "{diagnostics:#?}");
     let program = program.expect("program should parse");
     match &program.declarations[0] {
-        Decl::Variable { value: Expr::Member { span, .. }, .. } => {
+        Decl::Variable {
+            value: Expr::Member { span, .. },
+            ..
+        } => {
             let start = source.find("(foo").expect("nested expression start");
-            assert_eq!(*span, tantra_compiler::diagnostic::Span::new(start, source.len()));
+            assert_eq!(
+                *span,
+                tantra_compiler::diagnostic::Span::new(start, source.len())
+            );
         }
         other => panic!("expected member expression, got {other:?}"),
     }
