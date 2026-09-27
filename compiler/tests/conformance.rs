@@ -415,3 +415,23 @@ fn rejects_top_level_statements_in_v01() {
         "{diagnostics:#?}"
     );
 }
+
+#[test]
+fn parser_recovers_at_following_control_statement_without_semicolon() {
+    let source = r#"
+કાર્ય broken() {
+    સ્થિર first: = 1
+    પ્રયત્ન {
+        કામ()
+    } ભૂલ err {
+        ફેંકો err
+    }
+}
+"#;
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    let type_errors = diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == "T1015")
+        .count();
+    assert_eq!(type_errors, 1, "{diagnostics:#?}");
+}
