@@ -124,12 +124,12 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36297386803` (run `68`) for commit `953b7a4b1798d09f02aa75b8029b6804e0243d8a` completed successfully.
+GitHub Actions CI run `36301485787` (run `72`) for commit `5a65a2e0cedc44a0e738ee549649423d92f7aff0` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 25/25 conformance tests
+- `cargo test --all-targets`: passed — 26/26 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
 The latest suite additionally verifies documented struct type fields and generic parameters. The parser also now represents the EBNF `block` statement directly as an AST block node; enum syntax remains deliberately unspecified until an authoritative design decision.
