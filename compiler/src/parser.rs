@@ -107,6 +107,10 @@ pub enum Expr {
         expr: Box<Expr>,
         span: Span,
     },
+    Await {
+        expr: Box<Expr>,
+        span: Span,
+    },
     Binary {
         left: Box<Expr>,
         op: TokenKind,
@@ -283,7 +287,14 @@ impl Parser {
         let mut capabilities = Vec::new();
         while self.match_kind(&TokenKind::Capability) {
             let token = self.consume_identifier("T1010", "capability name expected")?;
-            capabilities.push(self.identifier_text(&token));
+            let mut name = self.identifier_text(&token);
+            while self.match_kind(&TokenKind::Dot) {
+                let segment =
+                    self.consume_identifier("T1031", "capability path component expected")?;
+                name.push('.');
+                name.push_str(&self.identifier_text(&segment));
+            }
+            capabilities.push(name);
         }
 
         let body = self.block()?;
@@ -597,6 +608,16 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Option<Expr> {
+        if self.match_kind(&TokenKind::Await) {
+            let start = self.previous().span.start;
+            let expr = self.unary()?;
+            let span = Span::new(start, value_span(&expr).end);
+            return Some(Expr::Await {
+                expr: Box::new(expr),
+                span,
+            });
+        }
+
         if matches!(
             self.peek_kind(),
             TokenKind::Bang | TokenKind::Plus | TokenKind::Minus
@@ -861,6 +882,7 @@ fn value_span(expr: &Expr) -> Span {
         | Expr::Boolean(_, span)
         | Expr::Null(span)
         | Expr::Unary { span, .. }
+        | Expr::Await { span, .. }
         | Expr::Binary { span, .. }
         | Expr::Call { span, .. }
         | Expr::Member { span, .. }
