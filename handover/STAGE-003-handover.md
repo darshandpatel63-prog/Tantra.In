@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `8c48fb3b485b27c230bb7943c435236e6ef99a2c`
-- **Verification:** GitHub Actions run `36296953857` (run `55`) — success, 22/22 conformance tests
+- **Current commit:** `0b7cb2422c02c7f7bdb92d4942cc2ee782ff5469`
+- **Verification:** GitHub Actions run `36297155171` (run `59`) — success, 23/23 conformance tests
 
 ## Work Completed
 
@@ -34,7 +34,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 22 tests covering:
+The conformance suite now contains 23 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -55,16 +55,17 @@ The conformance suite now contains 22 tests covering:
 - module/import declarations
 - expression precedence and right-associative assignment
 - explicit rejection of top-level statements in v0.1
+- parser recovery at a following control statement without a semicolon
 
 ## CI Verification
 
-GitHub Actions run `36296953857` (run `55`) passed all configured gates:
+GitHub Actions run `36297155171` (run `59`) passed all configured gates:
 1. rustfmt
 2. `cargo check --all-targets`
-3. `cargo test --all-targets` — 22/22 conformance tests passed
+3. `cargo test --all-targets` — 23/23 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run verified the grammar synchronization, module/import parsing, precedence/assignment coverage and top-level statement rejection in addition to the earlier lexer/parser hardening.
+The run additionally verified parser recovery synchronization at following control statements.
 
 ## Files Modified During This Stage
 
@@ -84,7 +85,7 @@ No duplicate implementation file or folder was created.
 ## Remaining Stage 003 Work
 
 1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF.
-2. Finalize `struct_type` and `enum_type` separator grammar and implement their full AST representation.
+2. Finalize `struct_type` only from the existing user-defined type example; do not invent enum syntax until an authoritative design is documented.
 3. Continue source-span and nested-syntax regression coverage.
 4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
 5. Audit Unicode security policy beyond the current conservative confusable rule.
