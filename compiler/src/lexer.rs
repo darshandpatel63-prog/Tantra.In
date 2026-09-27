@@ -93,13 +93,17 @@ impl<'a> Lexer<'a> {
                     self.diagnostics.push(Diagnostic::error(
                         "T0001",
                         format!("અમાન્ય અક્ષર: {ch:?}"),
-                        Span::new(start, self.position()),
+                        self.span(start, self.position()),
                     ));
                     continue;
                 }
             };
 
-            tokens.push(Token::new(token, start, self.position()));
+            tokens.push(Token::new(
+                token,
+                self.offset(start),
+                self.offset(self.position()),
+            ));
         }
 
         let end = self.source.len();
@@ -286,7 +290,7 @@ impl<'a> Lexer<'a> {
                     self.diagnostics.push(Diagnostic::error(
                         "T0005",
                         "string literal બંધ થયું નથી",
-                        Span::new(start, self.position()),
+                        self.span(start, self.position()),
                     ));
                     break;
                 }
@@ -298,7 +302,7 @@ impl<'a> Lexer<'a> {
             self.diagnostics.push(Diagnostic::error(
                 "T0005",
                 "string literal બંધ થયું નથી",
-                Span::new(start, self.position()),
+                self.span(start, self.position()),
             ));
         }
 
@@ -318,7 +322,7 @@ impl<'a> Lexer<'a> {
                     self.diagnostics.push(Diagnostic::error(
                         "T0006",
                         format!("અમાન્ય character escape: \\{other}"),
-                        Span::new(start, self.position()),
+                        self.span(start, self.position()),
                     ));
                     other
                 }
@@ -334,7 +338,7 @@ impl<'a> Lexer<'a> {
             self.diagnostics.push(Diagnostic::error(
                 "T0007",
                 "character literal બંધ થયું નથી",
-                Span::new(start, self.position()),
+                self.span(start, self.position()),
             ));
         }
 
@@ -439,6 +443,10 @@ impl<'a> Lexer<'a> {
 
     fn offset(&self, position: usize) -> usize {
         self.offsets[position.min(self.offsets.len() - 1)]
+    }
+
+    fn span(&self, start: usize, end: usize) -> Span {
+        Span::new(self.offset(start), self.offset(end))
     }
 
     fn lexeme(&self, start: usize) -> &str {
