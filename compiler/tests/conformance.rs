@@ -216,3 +216,107 @@ fn preserves_unary_expression_source_span() {
         other => panic!("unexpected AST: {other:?}"),
     }
 }
+
+#[test]
+fn parses_async_await_and_dotted_capabilities() {
+    let source = r#"
+જાહેર async કાર્ય fetch() -> Result<શબ્દ, ApiError> ક્ષમતા network.read ક્ષમતા secrets.read {
+    પરત await get()
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function {
+            async_,
+            capabilities,
+            body,
+            ..
+        } => {
+            assert!(*async_);
+            assert_eq!(capabilities, &vec!["network.read".to_owned(), "secrets.read".to_owned()]);
+            assert!(matches!(
+                body.statements.as_slice(),
+                [tantra_compiler::parser::Stmt::Return(
+                    Some(Expr::Await { .. }),
+                    _
+                )]
+            ));
+        }
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn parses_all_compound_assignment_operators() {
+    let source = r#"
+કાર્ય test() {
+    બદલ x: પૂર્ણાંક = 1
+    x += 1
+    x -= 1
+    x *= 2
+    x /= 2
+    x %= 2
+}
+"#;
+    let (tokens, lex_diagnostics) = Lexer::new(source).lex();
+    assert!(lex_diagnostics.is_empty(), "{lex_diagnostics:#?}");
+    for kind in [
+        TokenKind::PlusEqual,
+        TokenKind::MinusEqual,
+        TokenKind::StarEqual,
+        TokenKind::SlashEqual,
+        TokenKind::PercentEqual,
+    ] {
+        assert!(
+            tokens.iter().any(|token| std::mem::discriminant(&token.kind) == std::mem::discriminant(&kind)),
+            "missing compound assignment token: {kind:?}"
+        );
+    }
+
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+}
+
+#[test]
+fn parser_recovers_after_multiple_statement_errors() {
+    let source = r#"
+કાર્ય broken() {
+    સ્થિર first: = 1;
+    સ્થિર second: = 2;
+}
+"#;
+    let (_, diagnostics) = tantra_compiler::parse_source(source);
+    let errors = diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.code == "T1015")
+        .count();
+    assert_eq!(errors, 2, "{diagnostics:#?}");
+}
+
+#[test]
+fn preserves_original_unicode_identifier_span() {
+    let source = "સ્થિર cafe\u{0301} = 1";
+    let (tokens, diagnostics) = Lexer::new(source).lex();
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let start = "સ્થિર ".len();
+    let end = "સ્થિર cafe\u{0301}".len();
+    assert_eq!(tokens[1].span, tantra_compiler::diagnostic::Span::new(start, end));
+}
+
+#[test]
+fn preserves_nested_expression_source_span() {
+    let source = "સ્થિર value = (foo[1] + -bar).baz";
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+    match &program.declarations[0] {
+        Decl::Variable { value: Expr::Member { span, .. }, .. } => {
+            let start = source.find("(foo").expect("nested expression start");
+            assert_eq!(*span, tantra_compiler::diagnostic::Span::new(start, source.len()));
+        }
+        other => panic!("expected member expression, got {other:?}"),
+    }
+}
