@@ -567,10 +567,7 @@ impl Parser {
                 Some(Box::new(self.if_statement()?))
             } else {
                 let block = self.block()?;
-                Some(Box::new(Stmt::Expr(Expr::Grouped(
-                    Box::new(Expr::Null(block.span)),
-                    block.span,
-                ))))
+                Some(Box::new(Stmt::Block(block)))
             }
         } else {
             None
