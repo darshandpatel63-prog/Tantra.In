@@ -475,5 +475,10 @@ fn rejects_struct_type_missing_field_type() {
 }
 "#;
     let (_, diagnostics) = tantra_compiler::parse_source(source);
-    assert!(diagnostics.iter().any(|d| d.code == "T1015" || d.code == "T1036"), "{diagnostics:#?}");
+    assert!(
+        diagnostics
+            .iter()
+            .any(|d| d.code == "T1015" || d.code == "T1036"),
+        "{diagnostics:#?}"
+    );
 }
