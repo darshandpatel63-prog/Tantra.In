@@ -382,8 +382,18 @@ fn parses_expression_precedence_and_associativity() {
                 other => panic!("expected conditional expression tree, got {other:?}"),
             }
             match &body.statements[1] {
-                tantra_compiler::parser::Stmt::Expr(Expr::Binary { op: TokenKind::Equal, right, .. }) => {
-                    assert!(matches!(right.as_ref(), Expr::Binary { op: TokenKind::Equal, .. }));
+                tantra_compiler::parser::Stmt::Expr(Expr::Binary {
+                    op: TokenKind::Equal,
+                    right,
+                    ..
+                }) => {
+                    assert!(matches!(
+                        right.as_ref(),
+                        Expr::Binary {
+                            op: TokenKind::Equal,
+                            ..
+                        }
+                    ));
                 }
                 other => panic!("expected right-associative assignment, got {other:?}"),
             }
