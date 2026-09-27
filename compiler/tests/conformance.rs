@@ -506,3 +506,32 @@ fn parses_standalone_block_statement_as_block_ast() {
         other => panic!("expected function declaration, got {other:?}"),
     }
 }
+
+#[test]
+fn parses_else_block_as_block_statement() {
+    let source = r#"
+કાર્ય test(value: પૂર્ણાંક) {
+    જો value {
+        પરત
+    } નહીં {
+        પરત
+    }
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::If { else_branch, .. }] => {
+                assert!(matches!(
+                    else_branch.as_deref(),
+                    Some(tantra_compiler::parser::Stmt::Block(_))
+                ));
+            }
+            other => panic!("expected if statement, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
