@@ -355,11 +355,7 @@ fn parses_module_and_import_declarations() {
         Decl::Import { path, .. } => {
             assert_eq!(
                 path,
-                &vec![
-                    "ui".to_owned(),
-                    "controls".to_owned(),
-                    "button".to_owned()
-                ]
+                &vec!["ui".to_owned(), "controls".to_owned(), "button".to_owned()]
             );
         }
         other => panic!("expected import declaration, got {other:?}"),
