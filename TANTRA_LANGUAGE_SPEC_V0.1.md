@@ -149,6 +149,9 @@ type = identifier [ type_arguments ] ;
 type_arguments = < type { , type } > ;
 generic_params = < identifier { , identifier } > ;
 type_decl = રૂપ identifier [generic_params] struct_type | રૂપ identifier [generic_params] enum_type ;
+generic_params = < identifier { , identifier } > ;
+struct_type = { field_decl } ;
+field_decl = identifier : type ;
 module_decl = મોડ્યુલ identifier ;
 statement = block | if_stmt | while_stmt | for_stmt | return_stmt | break_stmt | continue_stmt | try_stmt | throw_stmt | expression_stmt ;
 block = { { declaration | statement } } ;
@@ -182,7 +185,7 @@ true_literal = સાચું ;
 false_literal = ખોટું ;
 null_literal = શૂન્ય ;
 
-v0.1 top-level execution is intentionally deferred: statements are legal only inside blocks. The Program AST therefore stores declarations in source order. The struct_type and enum_type productions remain provisional until their field/variant separator rules are finalized; they are not yet considered executable grammar conformance requirements.
+v0.1 top-level execution is intentionally deferred: statements are legal only inside blocks. The Program AST therefore stores declarations in source order. The struct_type field form is now executable from the documented user-defined type example: fields are repeated as identifier : type inside braces, with no comma/semicolon delimiter required. Enum syntax remains provisional because the blueprint does not define a concrete enum spelling or variant separator.
 
 Note: lexical token definitions, exact Unicode identifier grammar and the remaining provisional type grammar will be encoded in executable parser tests before implementation is considered conforming.
 
