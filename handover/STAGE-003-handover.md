@@ -1,15 +1,15 @@
 # TANTRA — STAGE 003 HANDOVER
 
 ## Date
-2026-09-25
+2026-09-27
 
 ## Stage
 Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `86579d7f09a0afd9b9841431b1afa0d7e0ae5a6f`
-- **Verification:** GitHub Actions run `36106832611` — success
+- **Current commit:** `0347230c576228816bded29fc9e574c50e7127f8`
+- **Verification:** GitHub Actions run `36296527816` (run `48`) — success, 19/19 conformance tests
 
 ## Work Completed
 
@@ -34,7 +34,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 11 tests covering:
+The conformance suite now contains 19 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -46,22 +46,29 @@ The conformance suite now contains 11 tests covering:
 - valid numeric separators/forms
 - malformed numeric literal rejection
 - invalid string/character escapes and character NUL escape
+- async/await parsing
+- dotted capability names
+- all compound assignment operators
+- parser recovery after multiple statement errors
+- original UTF-8 byte source spans
+- nested expression source spans
 
 ## CI Verification
 
-GitHub Actions run `36106832611` passed all configured gates:
+GitHub Actions run `36296527816` (run `48`) passed all configured gates:
 1. rustfmt
 2. `cargo check --all-targets`
-3. `cargo test --all-targets` — 11/11 conformance tests passed
+3. `cargo test --all-targets` — 19/19 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-Earlier failed runs were diagnostic/iteration steps and are not the final verification state.
+The run verified the new lexer byte-span normalization, async/await parsing, dotted capability parsing and parser-recovery regressions.
 
 ## Files Modified During This Stage
 
 Existing files modified:
 - `compiler/Cargo.toml`
 - `compiler/src/lexer.rs`
+- `compiler/src/parser.rs`
 - `compiler/tests/conformance.rs`
 - `TANTRA_LANGUAGE_SPEC_V0.1.md`
 - `HANDOVER.md`
@@ -73,12 +80,13 @@ No duplicate implementation file or folder was created.
 
 ## Remaining Stage 003 Work
 
-1. Expand exact executable grammar coverage against the v0.1 EBNF.
-2. Add source-span regression tests for Unicode and nested syntax.
-3. Strengthen parser recovery and cascade-suppression behavior.
-4. Audit Unicode security policy beyond the current conservative confusable rule.
-5. Refine provisional AST representations where grammar tests expose mismatches.
-6. Only after the syntax layer is sufficiently stable, begin name resolution and the primitive type checker.
+1. Complete exact executable grammar coverage against the v0.1 EBNF.
+2. Resolve the provisional `struct_type`, `enum_type` and `module_decl` grammar/AST definitions.
+3. Align the program-level AST with the EBNF's allowance for top-level statements, or document a deliberate specification decision.
+4. Continue source-span and nested-syntax regression coverage.
+5. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
+6. Audit Unicode security policy beyond the current conservative confusable rule.
+7. Only after the syntax layer is sufficiently stable, begin name resolution and the primitive type checker.
 
 ## Known Limitations
 - The lexer security rule is deliberately conservative and is not a complete implementation of all UTS #39 mixed-script/restriction policies.
