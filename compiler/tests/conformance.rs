@@ -334,3 +334,71 @@ fn preserves_nested_expression_source_span() {
         other => panic!("expected member expression, got {other:?}"),
     }
 }
+
+#[test]
+fn parses_module_and_import_declarations() {
+    let source = r#"
+મોડ્યુલ ગણિત
+આયાત ui.controls.button
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+    assert_eq!(program.declarations.len(), 2);
+
+    match &program.declarations[0] {
+        Decl::Module { name, .. } => assert_eq!(name, "ગણિત"),
+        other => panic!("expected module declaration, got {other:?}"),
+    }
+
+    match &program.declarations[1] {
+        Decl::Import { path, .. } => {
+            assert_eq!(path, &vec!["ui".into(), "controls".into(), "button".into()]);
+        }
+        other => panic!("expected import declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn parses_expression_precedence_and_associativity() {
+    let source = r#"
+કાર્ય test() {
+    સ્થિર value = a + b * c ** d ?? e ? f : g
+    x = y = z
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => {
+            assert_eq!(body.statements.len(), 2);
+            match &body.statements[0] {
+                tantra_compiler::parser::Stmt::Decl(Decl::Variable {
+                    value: Expr::Conditional { .. },
+                    ..
+                }) => {}
+                other => panic!("expected conditional expression tree, got {other:?}"),
+            }
+            match &body.statements[1] {
+                tantra_compiler::parser::Stmt::Expr(Expr::Binary { op: TokenKind::Equal, right, .. }) => {
+                    assert!(matches!(right.as_ref(), Expr::Binary { op: TokenKind::Equal, .. }));
+                }
+                other => panic!("expected right-associative assignment, got {other:?}"),
+            }
+        }
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn rejects_top_level_statements_in_v01() {
+    let source = "લખો(સાચું)";
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(program.is_none());
+    assert!(
+        diagnostics.iter().any(|d| d.code == "T1002"),
+        "{diagnostics:#?}"
+    );
+}
