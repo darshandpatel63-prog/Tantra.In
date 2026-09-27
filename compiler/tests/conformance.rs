@@ -535,3 +535,89 @@ fn parses_else_block_as_block_statement() {
         other => panic!("expected function declaration, got {other:?}"),
     }
 }
+
+
+#[test]
+fn preserves_else_if_chain_as_nested_if_ast() {
+    let source = r#"
+કાર્ય classify(value: પૂર્ણાંક) {
+    જો value > 10 {
+        પરત
+    } નહીં જો value > 0 {
+        પરત
+    } નહીં {
+        પરત
+    }
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::If { else_branch, .. }] => {
+                let nested = else_branch.as_deref().expect("expected else-if branch");
+                match nested {
+                    tantra_compiler::parser::Stmt::If {
+                        else_branch: nested_else,
+                        ..
+                    } => {
+                        assert!(matches!(
+                            nested_else.as_deref(),
+                            Some(tantra_compiler::parser::Stmt::Block(_))
+                        ));
+                    }
+                    other => panic!("expected nested else-if AST, got {other:?}"),
+                }
+            }
+            other => panic!("expected outer if statement, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn preserves_nested_control_flow_bodies_as_block_ast() {
+    let source = r#"
+કાર્ય nested(items: Array<પૂર્ણાંક>) {
+    જ્યારે સાચું {
+        માટે દરેક item માં items {
+            જો item > 0 {
+                પ્રયત્ન {
+                    લખો(item)
+                } ભૂલ err {
+                    ફેંકો err
+                }
+            }
+        }
+    }
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::While { body: while_body, .. }] => {
+                match &while_body.statements[..] {
+                    [tantra_compiler::parser::Stmt::ForEach { body: for_body, .. }] => {
+                        match &for_body.statements[..] {
+                            [tantra_compiler::parser::Stmt::If { then_block, .. }] => {
+                                assert!(matches!(
+                                    then_block.statements.as_slice(),
+                                    [tantra_compiler::parser::Stmt::Try { .. }]
+                                ));
+                            }
+                            other => panic!("expected nested if statement, got {other:?}"),
+                        }
+                    }
+                    other => panic!("expected nested foreach statement, got {other:?}"),
+                }
+            }
+            other => panic!("expected nested while statement, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
