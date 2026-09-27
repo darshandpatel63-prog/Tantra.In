@@ -743,6 +743,9 @@ impl Parser {
                 self.peek_kind(),
                 TokenKind::Const
                     | TokenKind::Mut
+                    | TokenKind::Public
+                    | TokenKind::Private
+                    | TokenKind::Async
                     | TokenKind::Fn
                     | TokenKind::Import
                     | TokenKind::Type
@@ -751,6 +754,10 @@ impl Parser {
                     | TokenKind::If
                     | TokenKind::While
                     | TokenKind::For
+                    | TokenKind::Try
+                    | TokenKind::Throw
+                    | TokenKind::Break
+                    | TokenKind::Continue
             ) && !same_variant(&self.previous().kind, self.peek_kind())
             {
                 return;
