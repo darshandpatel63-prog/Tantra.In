@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `7607fe92ebde3afab7ca1477aba945df0e9b672c`
-- **Verification:** GitHub Actions run `36297363823` (run `66`) — success, 25/25 conformance tests
+- **Current commit:** `953b7a4b1798d09f02aa75b8029b6804e0243d8a`
+- **Verification:** GitHub Actions run `36297386803` (run `68`) — success, 25/25 conformance tests
 
 ## Work Completed
 
@@ -58,6 +58,7 @@ The conformance suite now contains 25 tests covering:
 - parser recovery at a following control statement without a semicolon
 - documented struct fields and generic parameters
 - rejection of missing struct field types
+- standalone block statements represented as `Stmt::Block`
 
 ## CI Verification
 
@@ -86,7 +87,7 @@ No duplicate implementation file or folder was created.
 
 ## Remaining Stage 003 Work
 
-1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF.
+1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF, including statement-form blocks.
 2. Keep enum syntax provisional until an authoritative design decision; do not invent variant separators or enum spelling.
 3. Continue source-span and nested-syntax regression coverage.
 4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
