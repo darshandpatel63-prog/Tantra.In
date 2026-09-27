@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `0347230c576228816bded29fc9e574c50e7127f8`
-- **Verification:** GitHub Actions run `36296527816` (run `48`) — success, 19/19 conformance tests
+- **Current commit:** `8c48fb3b485b27c230bb7943c435236e6ef99a2c`
+- **Verification:** GitHub Actions run `36296953857` (run `55`) — success, 22/22 conformance tests
 
 ## Work Completed
 
@@ -34,7 +34,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 19 tests covering:
+The conformance suite now contains 22 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -52,16 +52,19 @@ The conformance suite now contains 19 tests covering:
 - parser recovery after multiple statement errors
 - original UTF-8 byte source spans
 - nested expression source spans
+- module/import declarations
+- expression precedence and right-associative assignment
+- explicit rejection of top-level statements in v0.1
 
 ## CI Verification
 
-GitHub Actions run `36296527816` (run `48`) passed all configured gates:
+GitHub Actions run `36296953857` (run `55`) passed all configured gates:
 1. rustfmt
 2. `cargo check --all-targets`
-3. `cargo test --all-targets` — 19/19 conformance tests passed
+3. `cargo test --all-targets` — 22/22 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run verified the new lexer byte-span normalization, async/await parsing, dotted capability parsing and parser-recovery regressions.
+The run verified the grammar synchronization, module/import parsing, precedence/assignment coverage and top-level statement rejection in addition to the earlier lexer/parser hardening.
 
 ## Files Modified During This Stage
 
@@ -80,13 +83,12 @@ No duplicate implementation file or folder was created.
 
 ## Remaining Stage 003 Work
 
-1. Complete exact executable grammar coverage against the v0.1 EBNF.
-2. Resolve the provisional `struct_type`, `enum_type` and `module_decl` grammar/AST definitions.
-3. Align the program-level AST with the EBNF's allowance for top-level statements, or document a deliberate specification decision.
-4. Continue source-span and nested-syntax regression coverage.
-5. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
-6. Audit Unicode security policy beyond the current conservative confusable rule.
-7. Only after the syntax layer is sufficiently stable, begin name resolution and the primitive type checker.
+1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF.
+2. Finalize `struct_type` and `enum_type` separator grammar and implement their full AST representation.
+3. Continue source-span and nested-syntax regression coverage.
+4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
+5. Audit Unicode security policy beyond the current conservative confusable rule.
+6. Only after the syntax layer is sufficiently stable, begin name resolution and the primitive type checker.
 
 ## Known Limitations
 - The lexer security rule is deliberately conservative and is not a complete implementation of all UTS #39 mixed-script/restriction policies.
