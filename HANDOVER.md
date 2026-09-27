@@ -124,15 +124,15 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36296953857` (run `55`) for commit `8c48fb3b485b27c230bb7943c435236e6ef99a2c` completed successfully.
+GitHub Actions CI run `36297155171` (run `59`) for commit `0b7cb2422c02c7f7bdb92d4942cc2ee782ff5469` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 22/22 conformance tests
+- `cargo test --all-targets`: passed — 23/23 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite additionally verifies module/import declarations, expression precedence/right-associative assignment, and the deliberate v0.1 rejection of top-level executable statements. The grammar baseline now explicitly defines await, throw, assignment operators, literals, arrays, generic type arguments and module declarations while keeping struct/enum separator syntax provisional.
+The latest suite additionally verifies module/import declarations, expression precedence/right-associative assignment, deliberate v0.1 rejection of top-level executable statements, and recovery at following control statements after malformed syntax. The grammar baseline explicitly defines await, throw, assignment operators, literals, arrays, generic type arguments and module declarations while keeping struct/enum syntax provisional.
 
 This is the current authoritative executable verification record.
 
