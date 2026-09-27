@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `5a65a2e0cedc44a0e738ee549649423d92f7aff0`
-- **Verification:** GitHub Actions run `36301485787` (run `72`) — success, 26/26 conformance tests
+- **Current commit:** `d9213324d4e7f3ed8276330dbbf0acae928631e6`
+- **Verification:** GitHub Actions run `36303532580` (run `75`) — success, 27/27 conformance tests
 
 ## Work Completed
 
@@ -34,7 +34,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 25 tests covering:
+The conformance suite now contains 27 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -59,16 +59,17 @@ The conformance suite now contains 25 tests covering:
 - documented struct fields and generic parameters
 - rejection of missing struct field types
 - standalone block statements represented as `Stmt::Block`
+- `else` blocks preserved as `Stmt::Block` rather than synthetic expressions
 
 ## CI Verification
 
-GitHub Actions run `36297155171` (run `59`) passed all configured gates:
+GitHub Actions run `36303532580` (run `75`) passed all configured gates:
 1. rustfmt
 2. `cargo check --all-targets`
-3. `cargo test --all-targets` — 23/23 conformance tests passed
+3. `cargo test --all-targets` — 27/27 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run additionally verified documented struct-field parsing and generic parameter parsing.
+The run additionally verified standalone block statements and correct `else` block AST preservation.
 
 ## Files Modified During This Stage
 
@@ -87,7 +88,7 @@ No duplicate implementation file or folder was created.
 
 ## Remaining Stage 003 Work
 
-1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF, including statement-form blocks.
+1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF, including conditional-branch AST and nested statement forms.
 2. Keep enum syntax provisional until an authoritative design decision; do not invent variant separators or enum spelling.
 3. Continue source-span and nested-syntax regression coverage.
 4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
