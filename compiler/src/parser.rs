@@ -71,6 +71,7 @@ pub struct Block {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     Decl(Decl),
+    Block(Block),
     Return(Option<Expr>, Span),
     If {
         condition: Expr,
@@ -541,13 +542,9 @@ impl Parser {
             return Some(Stmt::Continue(Span::new(span.start, end)));
         }
 
-        if self.match_kind(&TokenKind::LeftBrace) {
-            self.current = self.current.saturating_sub(1);
+        if self.check(&TokenKind::LeftBrace) {
             let block = self.block()?;
-            return Some(Stmt::Decl(Decl::Module {
-                name: "<block>".to_owned(),
-                span: block.span,
-            }));
+            return Some(Stmt::Block(block));
         }
 
         if self.check(&TokenKind::Semicolon) {
@@ -960,6 +957,7 @@ fn stmt_span(stmt: &Stmt) -> Span {
         Stmt::If { span, .. } | Stmt::While { span, .. } | Stmt::ForEach { span, .. } => *span,
         Stmt::Try { span, .. } => *span,
         Stmt::Throw(_, span) => *span,
+        Stmt::Block(block) => block.span,
         Stmt::Expr(expr) => value_span(expr),
     }
 }
