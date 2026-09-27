@@ -482,3 +482,27 @@ fn rejects_struct_type_missing_field_type() {
         "{diagnostics:#?}"
     );
 }
+
+#[test]
+fn parses_standalone_block_statement_as_block_ast() {
+    let source = r#"
+કાર્ય test() {
+    {
+        સ્થિર value: પૂર્ણાંક = 1
+    }
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::Block(block)] => {
+                assert_eq!(block.statements.len(), 1);
+            }
+            other => panic!("expected standalone block statement, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
