@@ -15,7 +15,7 @@
 
 **Stage:** 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
-**Status:** Stage 002 foundation verified by GitHub CI; Stage 003 hardening has begun.
+**Status:** Stage 003 remains active. Lexer/parser hardening and executable conformance have been expanded; latest full CI verification is green.
 
 ### Objective
 
@@ -73,7 +73,8 @@ Completed:
 │       └── conformance.rs
 └── handover/
     ├── STAGE-001-handover.md
-    └── STAGE-002-handover.md
+    ├── STAGE-002-handover.md
+    └── STAGE-003-handover.md
 ```
 
 ---
@@ -123,13 +124,15 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36106832611` for commit `86579d7f09a0afd9b9841431b1afa0d7e0ae5a6f` completed successfully.
+GitHub Actions CI run `36296527816` (run `48`) for commit `0347230c576228816bded29fc9e574c50e7127f8` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 11 conformance tests
+- `cargo test --all-targets`: passed — 19/19 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
+
+The latest suite verifies async/await parsing, dotted capability names, all compound-assignment operators, parser recovery, original UTF-8 byte spans, nested expression spans, Unicode security checks, numeric validation and escape validation.
 
 This is the current authoritative executable verification record.
 
@@ -154,15 +157,13 @@ No test result should be claimed until the workflow result is actually observed.
 No confirmed compiler bug has been established by execution yet because the new Rust implementation has not run in this environment.
 
 Known implementation risks:
-- The current UTS #39 confusable rule is intentionally conservative and only rejects the lexer-level non-ASCII cases whose skeleton reduces to a single ASCII alphanumeric; broader mixed-script/security policy remains future work.
-- Exact grammar coverage is still incomplete.
-- Source-span behavior needs an explicit regression suite.
-- Parser coverage is incomplete and some AST representations are provisional.
+- The current UTS #39 confusable rule is intentionally conservative; broader mixed-script/security policy remains future work.
+- Exact v0.1 grammar coverage is still incomplete.
+- The EBNF references `struct_type`, `enum_type` and `module_decl` without fully defining their productions; related AST/parse representations remain provisional.
+- The EBNF permits top-level statements, while the current `Program` AST stores top-level declarations; this requires an explicit alignment decision before full grammar conformance.
 - CI/toolchain pinning needs hardening.
 - Rust bootstrap-language choice should be formally reviewed.
-- Production security is not proven by these lexical checks.
-
----
+- Production security is not proven by the current lexical/parser checks.
 
 ## Historical Post-Stage Correction
 
@@ -173,13 +174,13 @@ The initial Stage 002 implementation contained a generated Rust character-litera
 ### Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 Primary objectives:
-1. Observe and fix CI failures — **completed for the current foundation**.
-2. Expand exact grammar tests.
-3. Audit and expand Unicode security policy beyond the current lexer rule.
-4. Improve source-span accuracy with regression tests.
-5. Improve parser error recovery and cascade suppression.
-8. Begin name resolution.
-9. Begin primitive type checking.
+1. Complete exact executable grammar coverage against the v0.1 EBNF.
+2. Resolve provisional type/module grammar and AST representations.
+3. Align the program-level AST with the EBNF's allowance for top-level statements, or document a deliberate specification decision.
+4. Continue source-span and nested-syntax regression coverage.
+5. Strengthen parser recovery and cascade suppression for remaining cases.
+6. Audit Unicode security policy beyond the current conservative confusable rule.
+7. Only after the syntax layer is sufficiently stable, begin name resolution and primitive type checking.
 
 ---
 
