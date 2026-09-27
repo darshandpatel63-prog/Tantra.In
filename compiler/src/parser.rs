@@ -31,6 +31,8 @@ pub enum Decl {
     },
     Type {
         name: String,
+        generic_params: Vec<String>,
+        fields: Vec<StructField>,
         span: Span,
     },
     Module {
@@ -41,6 +43,13 @@ pub enum Decl {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Param {
+    pub name: String,
+    pub ty: TypeRef,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructField {
     pub name: String,
     pub ty: TypeRef,
     pub span: Span,
@@ -329,22 +338,59 @@ impl Parser {
 
     fn type_decl(&mut self) -> Option<Decl> {
         let name = self.consume_identifier("T1013", "type name expected")?;
-        let span = name.span;
-        if self.match_kind(&TokenKind::LeftBrace) {
-            let mut depth = 1;
-            while depth > 0 && !self.check(&TokenKind::Eof) {
-                if self.match_kind(&TokenKind::LeftBrace) {
-                    depth += 1;
-                } else if self.match_kind(&TokenKind::RightBrace) {
-                    depth -= 1;
-                } else {
-                    self.advance();
+        let start = name.span.start;
+        let mut generic_params = Vec::new();
+
+        if self.match_kind(&TokenKind::Less) {
+            loop {
+                let parameter =
+                    self.consume_identifier("T1032", "generic parameter name expected")?;
+                generic_params.push(self.identifier_text(&parameter));
+                if !self.match_kind(&TokenKind::Comma) {
+                    break;
                 }
             }
+            self.consume(
+                &TokenKind::Greater,
+                "T1033",
+                "generic parameters માટે '>' expected",
+            )?;
         }
+
+        self.consume(
+            &TokenKind::LeftBrace,
+            "T1034",
+            "struct type માટે '{' expected",
+        );
+
+        let mut fields = Vec::new();
+        while !self.check(&TokenKind::RightBrace) && !self.check(&TokenKind::Eof) {
+            let field = self.consume_identifier("T1035", "struct field name expected")?;
+            let field_start = field.span.start;
+            self.consume(
+                &TokenKind::Colon,
+                "T1036",
+                "struct field type માટે ':' expected",
+            );
+            let ty = self.type_ref()?;
+            let field_span = Span::new(field_start, ty.span.end);
+            fields.push(StructField {
+                name: self.identifier_text(&field),
+                ty,
+                span: field_span,
+            });
+        }
+
+        let close = self.consume(
+            &TokenKind::RightBrace,
+            "T1037",
+            "struct type માટે '}' expected",
+        )?;
         Some(Decl::Type {
             name: self.identifier_text(&name),
-            span: Span::new(span.start, self.previous().span.end),
+            generic_params,
+            fields,
+            span: Span::new(start, close.span.end),
         })
     }
 
