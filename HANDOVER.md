@@ -124,15 +124,15 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36296527816` (run `48`) for commit `0347230c576228816bded29fc9e574c50e7127f8` completed successfully.
+GitHub Actions CI run `36296953857` (run `55`) for commit `8c48fb3b485b27c230bb7943c435236e6ef99a2c` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 19/19 conformance tests
+- `cargo test --all-targets`: passed — 22/22 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite verifies async/await parsing, dotted capability names, all compound-assignment operators, parser recovery, original UTF-8 byte spans, nested expression spans, Unicode security checks, numeric validation and escape validation.
+The latest suite additionally verifies module/import declarations, expression precedence/right-associative assignment, and the deliberate v0.1 rejection of top-level executable statements. The grammar baseline now explicitly defines await, throw, assignment operators, literals, arrays, generic type arguments and module declarations while keeping struct/enum separator syntax provisional.
 
 This is the current authoritative executable verification record.
 
@@ -159,8 +159,8 @@ No confirmed compiler bug has been established by execution yet because the new 
 Known implementation risks:
 - The current UTS #39 confusable rule is intentionally conservative; broader mixed-script/security policy remains future work.
 - Exact v0.1 grammar coverage is still incomplete.
-- The EBNF references `struct_type`, `enum_type` and `module_decl` without fully defining their productions; related AST/parse representations remain provisional.
-- The EBNF permits top-level statements, while the current `Program` AST stores top-level declarations; this requires an explicit alignment decision before full grammar conformance.
+- `struct_type` and `enum_type` remain provisional because field/variant separator rules are not finalized; their full AST representation is deferred.
+- Top-level executable statements are deliberately deferred in v0.1; `Program` stores top-level declarations in source order.
 - CI/toolchain pinning needs hardening.
 - Rust bootstrap-language choice should be formally reviewed.
 - Production security is not proven by the current lexical/parser checks.
