@@ -124,7 +124,7 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36297363823` (run `66`) for commit `7607fe92ebde3afab7ca1477aba945df0e9b672c` completed successfully.
+GitHub Actions CI run `36297386803` (run `68`) for commit `953b7a4b1798d09f02aa75b8029b6804e0243d8a` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
@@ -132,7 +132,7 @@ Verified by GitHub Actions:
 - `cargo test --all-targets`: passed — 25/25 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite additionally verifies documented struct type fields and generic parameters. The v0.1 grammar now has executable struct-field parsing aligned to the existing user-defined type example; enum syntax remains deliberately unspecified until an authoritative design decision.
+The latest suite additionally verifies documented struct type fields and generic parameters. The parser also now represents the EBNF `block` statement directly as an AST block node; enum syntax remains deliberately unspecified until an authoritative design decision.
 
 This is the current authoritative executable verification record.
 
@@ -159,7 +159,7 @@ No confirmed compiler bug has been established by execution yet because the new 
 Known implementation risks:
 - The current UTS #39 confusable rule is intentionally conservative; broader mixed-script/security policy remains future work.
 - Exact v0.1 grammar coverage is still incomplete.
-- `struct_type` and `enum_type` remain provisional because field/variant separator rules are not finalized; their full AST representation is deferred.
+- `enum_type` remains provisional because the blueprint does not define a concrete enum spelling or variant separator.
 - Top-level executable statements are deliberately deferred in v0.1; `Program` stores top-level declarations in source order.
 - CI/toolchain pinning needs hardening.
 - Rust bootstrap-language choice should be formally reviewed.
