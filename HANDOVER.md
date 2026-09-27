@@ -124,15 +124,15 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36301485787` (run `72`) for commit `5a65a2e0cedc44a0e738ee549649423d92f7aff0` completed successfully.
+GitHub Actions CI run `36303532580` (run `75`) for commit `d9213324d4e7f3ed8276330dbbf0acae928631e6` completed successfully.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 26/26 conformance tests
+- `cargo test --all-targets`: passed — 27/27 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite additionally verifies documented struct type fields and generic parameters. The parser also now represents the EBNF `block` statement directly as an AST block node; enum syntax remains deliberately unspecified until an authoritative design decision.
+The latest suite additionally verifies documented struct type fields and generic parameters, standalone block statements, and preservation of `else` blocks as `Stmt::Block`. Enum syntax remains deliberately unspecified until an authoritative design decision.
 
 This is the current authoritative executable verification record.
 
@@ -178,7 +178,7 @@ Primary objectives:
 2. Resolve provisional type/module grammar and AST representations.
 3. Align the program-level AST with the EBNF's allowance for top-level statements, or document a deliberate specification decision.
 4. Continue source-span and nested-syntax regression coverage.
-5. Strengthen parser recovery and cascade suppression for remaining cases.
+5. Strengthen parser recovery and cascade suppression for remaining cases, including nested conditional branches.
 6. Audit Unicode security policy beyond the current conservative confusable rule.
 7. Only after the syntax layer is sufficiently stable, begin name resolution and primitive type checking.
 
