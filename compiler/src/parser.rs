@@ -417,11 +417,7 @@ impl Parser {
                     break;
                 }
             }
-            self.consume(
-                &TokenKind::Greater,
-                "T1016",
-                "generic type માટે '>' expected",
-            );
+            self.consume_type_close("T1016", "generic type માટે '>' expected")?;
         }
 
         Some(TypeRef {
@@ -804,6 +800,27 @@ impl Parser {
             }
             self.advance();
         }
+    }
+
+    fn consume_type_close(
+        &mut self,
+        code: &'static str,
+        message: &'static str,
+    ) -> Option<Token> {
+        if self.check(&TokenKind::Greater) {
+            return Some(self.advance());
+        }
+
+        if self.check(&TokenKind::ShiftRight) {
+            let token = self.advance();
+            let first = Token::new(TokenKind::Greater, token.span.start, token.span.start + 1);
+            let second = Token::new(TokenKind::Greater, token.span.start + 1, token.span.end);
+            self.tokens.insert(self.current, second);
+            return Some(first);
+        }
+
+        self.error_here(code, message);
+        None
     }
 
     fn consume_identifier(&mut self, code: &'static str, message: &'static str) -> Option<Token> {
