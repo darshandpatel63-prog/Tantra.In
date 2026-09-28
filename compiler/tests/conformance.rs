@@ -599,28 +599,20 @@ fn preserves_nested_control_flow_bodies_as_block_ast() {
 
     match &program.declarations[0] {
         Decl::Function { body, .. } => match &body.statements[..] {
-            [tantra_compiler::parser::Stmt::While {
-                body: while_body,
-                ..
-            }] => {
-                match &while_body.statements[..] {
-                    [tantra_compiler::parser::Stmt::ForEach {
-                        body: for_body,
-                        ..
-                    }] => {
-                        match &for_body.statements[..] {
-                            [tantra_compiler::parser::Stmt::If { then_block, .. }] => {
-                                assert!(matches!(
-                                    then_block.statements.as_slice(),
-                                    [tantra_compiler::parser::Stmt::Try { .. }]
-                                ));
-                            }
-                            other => panic!("expected nested if statement, got {other:?}"),
+            [tantra_compiler::parser::Stmt::While { body: while_body, .. }] => match &while_body.statements[..] {
+                [tantra_compiler::parser::Stmt::ForEach { body: for_body, .. }] => {
+                    match &for_body.statements[..] {
+                        [tantra_compiler::parser::Stmt::If { then_block, .. }] => {
+                            assert!(matches!(
+                                then_block.statements.as_slice(),
+                                [tantra_compiler::parser::Stmt::Try { .. }]
+                            ));
                         }
+                        other => panic!("expected nested if statement, got {other:?}"),
                     }
-                    other => panic!("expected nested foreach statement, got {other:?}"),
                 }
-            }
+                other => panic!("expected nested foreach statement, got {other:?}"),
+            },
             other => panic!("expected nested while statement, got {other:?}"),
         },
         other => panic!("expected function declaration, got {other:?}"),
