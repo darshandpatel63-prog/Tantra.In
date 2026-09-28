@@ -8,8 +8,9 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current commit:** `d9213324d4e7f3ed8276330dbbf0acae928631e6`
-- **Verification:** GitHub Actions run `36303532580` (run `75`) — success, 27/27 conformance tests
+- **Current code commit:** `3f5750f73db0473c9716ec8fd7e86aad4da7117d`
+- **Latest executable verification:** GitHub Actions run `36462185311` (run `84`) — success, 30/30 conformance tests
+- **Current branch also contains the follow-up handover documentation commit(s).**
 
 ## Work Completed
 
@@ -69,7 +70,7 @@ GitHub Actions run `36303532580` (run `75`) passed all configured gates:
 3. `cargo test --all-targets` — 27/27 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run additionally verified standalone block statements and correct `else` block AST preservation.
+The run additionally verified standalone block statements, correct `else` block AST preservation, nested conditional/control-flow AST structure, and nested generic type arguments.
 
 ## Files Modified During This Stage
 
@@ -88,7 +89,7 @@ No duplicate implementation file or folder was created.
 
 ## Remaining Stage 003 Work
 
-1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF, including conditional-branch AST and nested statement forms.
+1. Continue exact executable grammar coverage against the synchronized v0.1 EBNF, including remaining expression/operator, source-span, and nested statement forms.
 2. Keep enum syntax provisional until an authoritative design decision; do not invent variant separators or enum spelling.
 3. Continue source-span and nested-syntax regression coverage.
 4. Strengthen parser recovery and cascade-suppression behavior for remaining cases.
