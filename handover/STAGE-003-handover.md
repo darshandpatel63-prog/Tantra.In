@@ -8,8 +8,8 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current code commit:** `3f5750f73db0473c9716ec8fd7e86aad4da7117d`
-- **Latest executable verification:** GitHub Actions run `36462185311` (run `84`) — success, 30/30 conformance tests
+- **Current code commit:** `7383777e41a53d82cbba693efd6dda333d89221e`
+- **Latest executable verification:** GitHub Actions run `36462296897` (run `87`) — success, 31/31 conformance tests
 - **Current branch also contains the follow-up handover documentation commit(s).**
 
 ## Work Completed
@@ -70,7 +70,7 @@ GitHub Actions run `36303532580` (run `75`) passed all configured gates:
 3. `cargo test --all-targets` — 27/27 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
-The run additionally verified standalone block statements, correct `else` block AST preservation, nested conditional/control-flow AST structure, and nested generic type arguments.
+The run additionally verified standalone block statements, correct `else` block AST preservation, nested conditional/control-flow AST structure, nested generic type arguments, and preservation of the `>>` right-shift operator after generic parsing.
 
 ## Files Modified During This Stage
 
