@@ -124,7 +124,7 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36303532580` (run `75`) for commit `d9213324d4e7f3ed8276330dbbf0acae928631e6` completed successfully.
+GitHub Actions CI run `36462185311` (run `84`) for commit `3f5750f73db0473c9716ec8fd7e86aad4da7117d` completed successfully. The suite passed rustfmt, cargo check, all 30 conformance tests, and Clippy.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
@@ -132,13 +132,13 @@ Verified by GitHub Actions:
 - `cargo test --all-targets`: passed — 27/27 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite additionally verifies documented struct type fields and generic parameters, standalone block statements, and preservation of `else` blocks as `Stmt::Block`. Enum syntax remains deliberately unspecified until an authoritative design decision.
+The latest suite additionally verifies documented struct type fields and generic parameters, standalone block statements, preservation of `else` blocks as `Stmt::Block`, nested conditional/control-flow AST structure, and nested generic type arguments. Enum syntax remains deliberately unspecified until an authoritative design decision.
 
 This is the current authoritative executable verification record.
 
 ## Verification State
 
-The Rust toolchain is not installed in the current execution environment.
+The Rust toolchain is not installed in the current execution environment; GitHub Actions run 84 is the authoritative executable verification for commit `3f5750f73db0473c9716ec8fd7e86aad4da7117d`.
 
 Therefore:
 - local Rust compilation: **not run**
