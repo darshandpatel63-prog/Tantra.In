@@ -505,6 +505,31 @@ fn parses_nested_generic_type_arguments() {
 }
 
 #[test]
+fn preserves_right_shift_operator_after_nested_generic_fix() {
+    let source = r#"
+કાર્ય shift() {
+    સ્થિર value = left >> right
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::Decl(Decl::Variable {
+                value: Expr::Binary { op, .. },
+                ..
+            })] => {
+                assert_eq!(*op, TokenKind::ShiftRight);
+            }
+            other => panic!("expected right-shift expression, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
+
+#[test]
 fn parses_standalone_block_statement_as_block_ast() {
     let source = r#"
 કાર્ય test() {
