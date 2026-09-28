@@ -536,7 +536,6 @@ fn parses_else_block_as_block_statement() {
     }
 }
 
-
 #[test]
 fn preserves_else_if_chain_as_nested_if_ast() {
     let source = r#"
@@ -600,9 +599,15 @@ fn preserves_nested_control_flow_bodies_as_block_ast() {
 
     match &program.declarations[0] {
         Decl::Function { body, .. } => match &body.statements[..] {
-            [tantra_compiler::parser::Stmt::While { body: while_body, .. }] => {
+            [tantra_compiler::parser::Stmt::While {
+                body: while_body,
+                ..
+            }] => {
                 match &while_body.statements[..] {
-                    [tantra_compiler::parser::Stmt::ForEach { body: for_body, .. }] => {
+                    [tantra_compiler::parser::Stmt::ForEach {
+                        body: for_body,
+                        ..
+                    }] => {
                         match &for_body.statements[..] {
                             [tantra_compiler::parser::Stmt::If { then_block, .. }] => {
                                 assert!(matches!(
