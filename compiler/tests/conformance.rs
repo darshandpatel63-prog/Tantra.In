@@ -484,6 +484,27 @@ fn rejects_struct_type_missing_field_type() {
 }
 
 #[test]
+fn parses_nested_generic_type_arguments() {
+    let source = r#"
+સ્થિર values: Array<Array<પૂર્ણાંક>> = []
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Variable { ty: Some(ty), .. } => {
+            assert_eq!(ty.name, "Array");
+            assert_eq!(ty.arguments.len(), 1);
+            assert_eq!(ty.arguments[0].name, "Array");
+            assert_eq!(ty.arguments[0].arguments.len(), 1);
+            assert_eq!(ty.arguments[0].arguments[0].name, "પૂર્ણાંક");
+        }
+        other => panic!("expected variable declaration with nested generic type, got {other:?}"),
+    }
+}
+
+#[test]
 fn parses_standalone_block_statement_as_block_ast() {
     let source = r#"
 કાર્ય test() {
