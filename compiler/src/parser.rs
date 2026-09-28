@@ -802,11 +802,7 @@ impl Parser {
         }
     }
 
-    fn consume_type_close(
-        &mut self,
-        code: &'static str,
-        message: &'static str,
-    ) -> Option<Token> {
+    fn consume_type_close(&mut self, code: &'static str, message: &'static str) -> Option<Token> {
         if self.check(&TokenKind::Greater) {
             return Some(self.advance());
         }
