@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use unicode_ident::{is_xid_continue, is_xid_start};
 use unicode_normalization::UnicodeNormalization;
 use unicode_security::skeleton;
@@ -332,12 +330,22 @@ impl<'a> Lexer<'a> {
             None => '\0',
         };
 
-        if self.peek() == Some('\'') {
+        if self.peek() == Some('\\'') {
             self.advance();
         } else {
+            while let Some(ch) = self.peek() {
+                if ch == '\\'' {
+                    self.advance();
+                    break;
+                }
+                if ch == '\\n' || ch == '\\r' {
+                    break;
+                }
+                self.advance();
+            }
             self.diagnostics.push(Diagnostic::error(
                 "T0007",
-                "character literal બંધ થયું નથી",
+                "character literal બંધ થયું નથી અથવા તેમાં એકથી વધુ અક્ષરો છે",
                 self.span(start, self.position()),
             ));
         }
@@ -490,38 +498,35 @@ fn confusable_ascii_prototype(character: char) -> Option<char> {
 }
 
 fn keyword(text: &str) -> Option<TokenKind> {
-    let mut map = HashMap::new();
-    for (key, kind) in [
-        ("સ્થિર", TokenKind::Const),
-        ("બદલ", TokenKind::Mut),
-        ("કાર્ય", TokenKind::Fn),
-        ("પરત", TokenKind::Return),
-        ("જો", TokenKind::If),
-        ("નહીં", TokenKind::Else),
-        ("તો", TokenKind::Then),
-        ("માટે", TokenKind::For),
-        ("દરેક", TokenKind::Each),
-        ("માં", TokenKind::In),
-        ("જ્યારે", TokenKind::While),
-        ("તોડો", TokenKind::Break),
-        ("આગળ", TokenKind::Continue),
-        ("આયાત", TokenKind::Import),
-        ("માંથી", TokenKind::From),
-        ("રૂપ", TokenKind::Type),
-        ("પ્રયત્ન", TokenKind::Try),
-        ("ભૂલ", TokenKind::Error),
-        ("ફેંકો", TokenKind::Throw),
-        ("સાચું", TokenKind::True),
-        ("ખોટું", TokenKind::False),
-        ("શૂન્ય", TokenKind::Null),
-        ("async", TokenKind::Async),
-        ("await", TokenKind::Await),
-        ("ક્ષમતા", TokenKind::Capability),
-        ("જાહેર", TokenKind::Public),
-        ("ખાનગી", TokenKind::Private),
-        ("મોડ્યુલ", TokenKind::Module),
-    ] {
-        map.insert(key, kind);
-    }
-    map.get(text).cloned()
+    Some(match text {
+        "સ્થિર" => TokenKind::Const,
+        "બદલ" => TokenKind::Mut,
+        "કાર્ય" => TokenKind::Fn,
+        "પરત" => TokenKind::Return,
+        "જો" => TokenKind::If,
+        "નહીં" => TokenKind::Else,
+        "તો" => TokenKind::Then,
+        "માટે" => TokenKind::For,
+        "દરેક" => TokenKind::Each,
+        "માં" => TokenKind::In,
+        "જ્યારે" => TokenKind::While,
+        "તોડો" => TokenKind::Break,
+        "આગળ" => TokenKind::Continue,
+        "આયાત" => TokenKind::Import,
+        "માંથી" => TokenKind::From,
+        "રૂપ" => TokenKind::Type,
+        "પ્રયત્ન" => TokenKind::Try,
+        "ભૂલ" => TokenKind::Error,
+        "ફેંકો" => TokenKind::Throw,
+        "સાચું" => TokenKind::True,
+        "ખોટું" => TokenKind::False,
+        "શૂન્ય" => TokenKind::Null,
+        "async" => TokenKind::Async,
+        "await" => TokenKind::Await,
+        "ક્ષમતા" => TokenKind::Capability,
+        "જાહેર" => TokenKind::Public,
+        "ખાનગી" => TokenKind::Private,
+        "મોડ્યુલ" => TokenKind::Module,
+        _ => return None,
+    })
 }
