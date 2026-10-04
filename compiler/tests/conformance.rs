@@ -666,3 +666,105 @@ fn preserves_nested_control_flow_bodies_as_block_ast() {
         other => panic!("expected function declaration, got {other:?}"),
     }
 }
+
+
+#[test]
+fn rejects_multi_character_literal_without_cascade() {
+    let (tokens, diagnostics) = Lexer::new("'ab' c").lex();
+    assert_eq!(
+        diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.code == "T0007")
+            .count(),
+        1,
+        "{diagnostics:#?}"
+    );
+    assert!(
+        matches!(tokens[1].kind, TokenKind::Identifier(ref name) if name == "c"),
+        "expected lexer recovery to resume after malformed character literal: {tokens:#?}"
+    );
+}
+
+#[test]
+fn parses_chained_postfix_expression() {
+    let source = r#"
+કાર્ય chain() {
+    સ્થિર value = make(1)[0].name
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Function { body, .. } => match &body.statements[..] {
+            [tantra_compiler::parser::Stmt::Decl(Decl::Variable {
+                value: Expr::Member { object, .. },
+                ..
+            })] => match object.as_ref() {
+                Expr::Index { object, .. } => {
+                    assert!(matches!(object.as_ref(), Expr::Call { .. }));
+                }
+                other => panic!("expected indexed call expression, got {other:?}"),
+            },
+            other => panic!("expected variable declaration, got {other:?}"),
+        },
+        other => panic!("expected function declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn parses_multiple_and_nested_generic_arguments() {
+    let source = r#"
+સ્થિર values: Map<શબ્દ, Array<પૂર્ણાંક>> = []
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Variable { ty: Some(ty), .. } => {
+            assert_eq!(ty.name, "Map");
+            assert_eq!(ty.arguments.len(), 2);
+            assert_eq!(ty.arguments[0].name, "શબ્દ");
+            assert_eq!(ty.arguments[1].name, "Array");
+            assert_eq!(ty.arguments[1].arguments[0].name, "પૂર્ણાંક");
+        }
+        other => panic!("expected typed variable declaration, got {other:?}"),
+    }
+}
+
+#[test]
+fn parses_complete_binary_operator_precedence_chain() {
+    let source = r#"
+કાર્ય operators() {
+    સ્થિર value = a || b && c | d ^ e & f == g != h < i <= j > k >= l << m >> n + o - p * q / r % s ** t ?? u
+}
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    assert!(program.is_some(), "operator precedence chain should parse");
+}
+
+#[test]
+fn conditional_expression_is_right_associative() {
+    let source = r#"
+સ્થિર value = a ? b : c ? d : e
+"#;
+    let (program, diagnostics) = tantra_compiler::parse_source(source);
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+    let program = program.expect("program should parse");
+
+    match &program.declarations[0] {
+        Decl::Variable {
+            value:
+                Expr::Conditional {
+                    else_expr, ..
+                },
+            ..
+        } => {
+            assert!(matches!(else_expr.as_ref(), Expr::Conditional { .. }));
+        }
+        other => panic!("expected right-associative conditional expression, got {other:?}"),
+    }
+}
