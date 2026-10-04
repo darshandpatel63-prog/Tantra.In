@@ -15,7 +15,7 @@
 
 **Stage:** 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
-**Status:** Stage 003 remains active. Lexer/parser hardening and executable conformance have been expanded; latest full CI verification is green.
+**Status:** Stage 003 remains active. Lexer/parser hardening and executable conformance have been expanded; the latest full CI verification for the current implementation is green.
 
 ### Objective
 
@@ -124,7 +124,7 @@ Security-first architecture and v0.1 invariants are specified. Production securi
 
 ## Latest Verification
 
-GitHub Actions CI run `36462296897` (run `87`) for commit `7383777e41a53d82cbba693efd6dda333d89221e` completed successfully. The suite passed rustfmt, cargo check, all 31 conformance tests, and Clippy.
+GitHub Actions CI run `37171079010` (run `95`) for commit `c920b6bb1c76683cc36a6b86e37cdd598ff8b693` completed successfully. The suite passed rustfmt, `cargo check --all-targets`, all 36 conformance tests, and Clippy.
 
 Verified by GitHub Actions:
 - rustfmt check: passed
@@ -132,13 +132,13 @@ Verified by GitHub Actions:
 - `cargo test --all-targets`: passed — 27/27 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
-The latest suite additionally verifies documented struct type fields and generic parameters, standalone block statements, preservation of `else` blocks as `Stmt::Block`, nested conditional/control-flow AST structure, nested generic type arguments, and preservation of the `>>` right-shift operator after generic parsing. Enum syntax remains deliberately unspecified until an authoritative design decision.
+The latest suite additionally verifies chained postfix expressions, multiple/nested generic arguments, the complete binary-operator precedence chain, right-associative conditional expressions, multi-character character-literal recovery without lexer cascade, documented struct type fields and generic parameters, standalone block statements, preservation of `else` blocks as `Stmt::Block`, nested conditional/control-flow AST structure, nested generic type arguments, and preservation of the `>>` right-shift operator after generic parsing. Enum syntax remains deliberately unspecified until an authoritative design decision.
 
 This is the current authoritative executable verification record.
 
 ## Verification State
 
-The Rust toolchain is not installed in the current execution environment; GitHub Actions run 87 is the authoritative executable verification for commit `7383777e41a53d82cbba693efd6dda333d89221e`.
+The Rust toolchain is not installed in the current execution environment; GitHub Actions run 95 is the authoritative executable verification for commit `c920b6bb1c76683cc36a6b86e37cdd598ff8b693`.
 
 Therefore:
 - local Rust compilation: **not run**
@@ -176,11 +176,11 @@ The initial Stage 002 implementation contained a generated Rust character-litera
 Primary objectives:
 1. Complete exact executable grammar coverage against the v0.1 EBNF.
 2. Resolve provisional type/module grammar and AST representations.
-3. Align the program-level AST with the EBNF's allowance for top-level statements, or document a deliberate specification decision.
+3. Keep the deliberate v0.1 top-level-declaration-only decision synchronized with the EBNF/specification wording and tests.
 4. Continue source-span and nested-syntax regression coverage.
 5. Strengthen parser recovery and cascade suppression for remaining cases, including nested conditional branches.
 6. Audit Unicode security policy beyond the current conservative confusable rule.
-7. Only after the syntax layer is sufficiently stable, begin name resolution and primitive type checking.
+7. Once the remaining syntax/recovery gaps are sufficiently stable, begin name resolution and the primitive type checker.
 
 ---
 
