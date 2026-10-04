@@ -338,7 +338,7 @@ impl<'a> Lexer<'a> {
                     self.advance();
                     break;
                 }
-                if ch == '\\n' || ch == '\\r' {
+                if ch == '\n' || ch == '\r' {
                     break;
                 }
                 self.advance();
