@@ -330,11 +330,11 @@ impl<'a> Lexer<'a> {
             None => '\0',
         };
 
-        if self.peek() == Some('\\'') {
+        if self.peek() == Some('\'') {
             self.advance();
         } else {
             while let Some(ch) = self.peek() {
-                if ch == '\\'' {
+                if ch == '\'' {
                     self.advance();
                     break;
                 }
