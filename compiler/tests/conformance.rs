@@ -667,7 +667,6 @@ fn preserves_nested_control_flow_bodies_as_block_ast() {
     }
 }
 
-
 #[test]
 fn rejects_multi_character_literal_without_cascade() {
     let (tokens, diagnostics) = Lexer::new("'ab' c").lex();
@@ -757,10 +756,7 @@ fn conditional_expression_is_right_associative() {
 
     match &program.declarations[0] {
         Decl::Variable {
-            value:
-                Expr::Conditional {
-                    else_expr, ..
-                },
+            value: Expr::Conditional { else_expr, .. },
             ..
         } => {
             assert!(matches!(else_expr.as_ref(), Expr::Conditional { .. }));
