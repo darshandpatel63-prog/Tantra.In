@@ -1,15 +1,15 @@
 # TANTRA — STAGE 003 HANDOVER
 
 ## Date
-2026-09-27
+2026-10-04
 
 ## Stage
 Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 
 ## State at Handover
 - **Current branch:** `main`
-- **Current code commit:** `7383777e41a53d82cbba693efd6dda333d89221e`
-- **Latest executable verification:** GitHub Actions run `36462296897` (run `87`) — success, 31/31 conformance tests
+- **Current code commit:** `c920b6bb1c76683cc36a6b86e37cdd598ff8b693`
+- **Latest executable verification:** GitHub Actions run `37171079010` (run `95`) — success, 36/36 conformance tests
 - **Current branch also contains the follow-up handover documentation commit(s).**
 
 ## Work Completed
@@ -28,6 +28,13 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Identifier-adjacent numeric forms are rejected.
 - Malformed numeric literals emit stable diagnostic `T0009`.
 
+### Character-literal recovery hardening
+- Malformed multi-character character literals now consume the remainder of the literal through its closing quote (or line end/EOF) and emit a single `T0007`, preventing lexer cascade diagnostics.
+- The regression suite verifies recovery resumes at the following identifier.
+
+### Keyword lookup hardening
+- Keyword recognition no longer constructs a fresh `HashMap` for every identifier; it uses a direct match table with no per-token map allocation.
+
 ### Escape validation
 - Existing invalid string escape diagnostic `T0004` is covered by executable tests.
 - Existing invalid character escape diagnostic `T0006` is covered by executable tests.
@@ -35,7 +42,7 @@ Stage 003 — Lexer/Parser Hardening and Executable Conformance Expansion
 - Escape behavior is covered by the conformance suite.
 
 ### Executable conformance
-The conformance suite now contains 27 tests covering:
+The conformance suite now contains 36 tests covering:
 - Gujarati/core keywords and literals
 - nested block comments and operators
 - parser variable/function AST construction
@@ -60,14 +67,19 @@ The conformance suite now contains 27 tests covering:
 - documented struct fields and generic parameters
 - rejection of missing struct field types
 - standalone block statements represented as `Stmt::Block`
+- chained postfix expressions
+- multiple and nested generic type arguments
+- the complete binary-operator precedence chain
+- right-associative conditional expressions
+- multi-character character-literal recovery without cascade diagnostics
 - `else` blocks preserved as `Stmt::Block` rather than synthetic expressions
 
 ## CI Verification
 
-GitHub Actions run `36303532580` (run `75`) passed all configured gates:
+GitHub Actions run `37171079010` (run `95`) passed all configured gates:
 1. rustfmt
 2. `cargo check --all-targets`
-3. `cargo test --all-targets` — 27/27 conformance tests passed
+3. `cargo test --all-targets` — 36/36 conformance tests passed
 4. `cargo clippy --all-targets -- -D warnings`
 
 The run additionally verified standalone block statements, correct `else` block AST preservation, nested conditional/control-flow AST structure, nested generic type arguments, and preservation of the `>>` right-shift operator after generic parsing.
@@ -99,6 +111,7 @@ No duplicate implementation file or folder was created.
 ## Known Limitations
 - The lexer security rule is deliberately conservative and is not a complete implementation of all UTS #39 mixed-script/restriction policies.
 - The parser is still a foundation, not the full v0.1 grammar.
+- The new lexer recovery/keyword changes were verified by GitHub Actions; local Rust execution remains unavailable in the present environment.
 - Name resolution, type checking, capability checking, typed IR, runtime and standard library are not implemented.
 - Production security has not been proven.
 
