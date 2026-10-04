@@ -129,7 +129,7 @@ GitHub Actions CI run `37171079010` (run `95`) for commit `c920b6bb1c76683cc36a6
 Verified by GitHub Actions:
 - rustfmt check: passed
 - `cargo check --all-targets`: passed
-- `cargo test --all-targets`: passed — 27/27 conformance tests
+- `cargo test --all-targets`: passed — 36/36 conformance tests
 - `cargo clippy --all-targets -- -D warnings`: passed
 
 The latest suite additionally verifies chained postfix expressions, multiple/nested generic arguments, the complete binary-operator precedence chain, right-associative conditional expressions, multi-character character-literal recovery without lexer cascade, documented struct type fields and generic parameters, standalone block statements, preservation of `else` blocks as `Stmt::Block`, nested conditional/control-flow AST structure, nested generic type arguments, and preservation of the `>>` right-shift operator after generic parsing. Enum syntax remains deliberately unspecified until an authoritative design decision.
@@ -154,7 +154,7 @@ No test result should be claimed until the workflow result is actually observed.
 
 ## Known Bugs / Risks
 
-No confirmed compiler bug has been established by execution yet because the new Rust implementation has not run in this environment.
+The previously identified multi-character character-literal recovery weakness was fixed and is covered by the new lexer regression test. The current Rust implementation itself was verified by GitHub Actions; local Rust execution remains unavailable in this environment.
 
 Known implementation risks:
 - The current UTS #39 confusable rule is intentionally conservative; broader mixed-script/security policy remains future work.
