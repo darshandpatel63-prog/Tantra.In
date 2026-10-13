@@ -20,7 +20,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: tantra-${{ github.event_name }}-${{ github.ref }}
@@ -52,6 +51,9 @@ jobs:
 
   cleanup:
     if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      actions: write
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
