@@ -23,7 +23,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: tantra-ci-${{ github.ref }}
+  group: tantra-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -75,12 +75,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          mapfile -t cache_ids < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/caches?per_page=100" --jq '.actions_caches[].id')
           count=0
-          while IFS= read -r cache_id; do
+          for cache_id in "${cache_ids[@]}"; do
             [[ -n "$cache_id" ]] || continue
             gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/caches/$cache_id"
             count=$((count + 1))
-          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/caches?per_page=100" --jq '.actions_caches[].id')
+          done
           echo "Deleted $count Actions cache entries."
 
       - name: Remove old artifacts
@@ -90,15 +91,108 @@ jobs:
         run: |
           set -euo pipefail
           cutoff="$(date -u -d "$RETENTION_DAYS days ago" +%s)"
+          mapfile -t artifacts < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[] | [.id, .created_at] | @tsv')
           count=0
-          while IFS=$'\t' read -r artifact_id created_at; do
+          for row in "${artifacts[@]}"; do
+            IFS=
+          echo "Deleted $count artifacts older than $RETENTION_DAYS days; newer artifacts were preserved."
+
+      - name: Remove old completed workflow runs and logs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RETENTION_DAYS: ${{ inputs.run_retention_days }}
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d "$RETENTION_DAYS days ago" +%s)"
+          current_run="$GITHUB_RUN_ID"
+          mapfile -t runs < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs?per_page=100" --jq '.workflow_runs[] | select(.status == "completed") | [.id, .created_at] | @tsv')
+          count=0
+          for row in "${runs[@]}"; do
+            IFS=
+          echo "Deleted $count completed workflow runs older than $RETENTION_DAYS days; active runs and this cleanup run were preserved."
+
+      - name: Cleanup summary
+        if: always()
+        run: |
+          {
+            echo "## Tantra GitHub Actions cleanup"
+            echo "- All repository Actions caches were targeted for deletion."
+            echo "- Artifacts older than ${{ inputs.artifact_retention_days }} days were targeted for deletion."
+            echo "- Completed workflow runs/logs older than ${{ inputs.run_retention_days }} days were targeted for deletion."
+            echo "- Active runs and this cleanup run were preserved."
+            echo "- Workflow files were not automatically deleted; the repository currently has only the required `.github/workflows/ci.yml`."
+          } >> "$GITHUB_STEP_SUMMARY"
+\t' read -r artifact_id created_at <<< "$row"
             [[ -n "$artifact_id" && -n "$created_at" ]] || continue
             created="$(date -u -d "$created_at" +%s)"
             if (( created < cutoff )); then
               gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"
               count=$((count + 1))
             fi
-          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[] | [.id, .created_at] | @tsv')
+          done
+          echo "Deleted $count artifacts older than $RETENTION_DAYS days; newer artifacts were preserved."
+
+      - name: Remove old completed workflow runs and logs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RETENTION_DAYS: ${{ inputs.run_retention_days }}
+        run: |
+          set -euo pipefail
+          cutoff="$(date -u -d "$RETENTION_DAYS days ago" +%s)"
+          current_run="$GITHUB_RUN_ID"
+          count=0
+          while IFS=$'\t' read -r run_id created_at; do
+            [[ -n "$run_id" && -n "$created_at" ]] || continue
+            [[ "$run_id" == "$current_run" ]] && continue
+            created="$(date -u -d "$created_at" +%s)"
+            if (( created < cutoff )); then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/runs/$run_id"
+              count=$((count + 1))
+            fi
+          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs?per_page=100" --jq '.workflow_runs[] | select(.status == "completed") | [.id, .created_at] | @tsv')
+          echo "Deleted $count completed workflow runs older than $RETENTION_DAYS days; active runs and this cleanup run were preserved."
+
+      - name: Cleanup summary
+        if: always()
+        run: |
+          {
+            echo "## Tantra GitHub Actions cleanup"
+            echo "- All repository Actions caches were targeted for deletion."
+            echo "- Artifacts older than ${{ inputs.artifact_retention_days }} days were targeted for deletion."
+            echo "- Completed workflow runs/logs older than ${{ inputs.run_retention_days }} days were targeted for deletion."
+            echo "- Active runs and this cleanup run were preserved."
+            echo "- Workflow files were not automatically deleted; the repository currently has only the required `.github/workflows/ci.yml`."
+          } >> "$GITHUB_STEP_SUMMARY"
+\t' read -r run_id created_at <<< "$row"
+            [[ -n "$run_id" && -n "$created_at" ]] || continue
+            [[ "$run_id" == "$current_run" ]] && continue
+            created="$(date -u -d "$created_at" +%s)"
+            if (( created < cutoff )); then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/runs/$run_id"
+              count=$((count + 1))
+            fi
+          done
+          echo "Deleted $count completed workflow runs older than $RETENTION_DAYS days; active runs and this cleanup run were preserved."
+
+      - name: Cleanup summary
+        if: always()
+        run: |
+          {
+            echo "## Tantra GitHub Actions cleanup"
+            echo "- All repository Actions caches were targeted for deletion."
+            echo "- Artifacts older than ${{ inputs.artifact_retention_days }} days were targeted for deletion."
+            echo "- Completed workflow runs/logs older than ${{ inputs.run_retention_days }} days were targeted for deletion."
+            echo "- Active runs and this cleanup run were preserved."
+            echo "- Workflow files were not automatically deleted; the repository currently has only the required `.github/workflows/ci.yml`."
+          } >> "$GITHUB_STEP_SUMMARY"
+\t' read -r artifact_id created_at <<< "$row"
+            [[ -n "$artifact_id" && -n "$created_at" ]] || continue
+            created="$(date -u -d "$created_at" +%s)"
+            if (( created < cutoff )); then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"
+              count=$((count + 1))
+            fi
+          done
           echo "Deleted $count artifacts older than $RETENTION_DAYS days; newer artifacts were preserved."
 
       - name: Remove old completed workflow runs and logs
